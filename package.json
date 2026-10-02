@@ -1,0 +1,26 @@
+{
+  "name": "scribblechaos",
+  "version": "1.0.0",
+  "description": "Ultra-modern dark-themed AI art battleground gaming portal featuring 3 interactive game modes and Socket.IO backend.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "ai",
+    "drawing-game",
+    "socketio",
+    "multiplayer",
+    "canvas",
+    "game-portal"
+  ],
+  "author": "Antigravity AI",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
