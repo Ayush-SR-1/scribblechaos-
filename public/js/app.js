@@ -14,7 +14,7 @@ class ScribbleApp {
   }
 
   bindDOMEvents() {
-    // Stage 1: Continue to Battleground Button
+    // Stage 1: Continue Button
     const btnContinue = document.getElementById('btnContinueToBattleground');
     if (btnContinue) {
       btnContinue.addEventListener('click', () => {
@@ -102,7 +102,7 @@ class ScribbleApp {
       });
     }
 
-    // Leaderboard Modal Close Button
+    // Leaderboard Modal Close
     const btnCloseLeaderboard = document.getElementById('btnCloseLeaderboard');
     const modalLeaderboard = document.getElementById('leaderboardModal');
     if (btnCloseLeaderboard && modalLeaderboard) {
@@ -164,7 +164,19 @@ class ScribbleApp {
       });
     }
 
-    // Color Swatches
+    // Brush Size Selector Buttons
+    const sizeBtns = document.querySelectorAll('.size-btn');
+    sizeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sz = parseInt(btn.getAttribute('data-size')) || 6;
+        if (window.scribbleCanvas) window.scribbleCanvas.setSize(sz);
+        sizeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (window.soundEngine) window.soundEngine.playClick();
+      });
+    });
+
+    // 24-Color Palette Swatches
     const colorSwatches = document.querySelectorAll('.color-swatch');
     colorSwatches.forEach(swatch => {
       swatch.addEventListener('click', () => {

@@ -11,7 +11,7 @@
 </head>
 <body>
 
-  <!-- Animated 3D Paint Strokes & Splash Background Canvas -->
+  <!-- Animated 3D Paint Background Canvas -->
   <canvas id="bg3dCanvas"></canvas>
 
   <!-- Top Navigation Header -->
@@ -75,7 +75,7 @@
     <!-- STAGE 2: GAME MODE SELECTION VIEW -->
     <div id="gameSelectView" style="display: none; width: 100%; flex-direction: column; align-items: center; gap: 1.5rem;">
       
-      <!-- Title Block with Yellow Highlight Box behind "Pixel" -->
+      <!-- Title Block -->
       <div class="portal-header-block">
         <div class="portal-title-row">
           <span class="title-highlight-box">Pixel</span>
@@ -210,26 +210,59 @@
             <canvas id="mainCanvas"></canvas>
           </div>
 
-          <!-- Canvas Toolbar Controls -->
+          <!-- Canvas Toolbar Controls (Complete 24-Color Palette Grid + Size Selectors) -->
           <div class="canvas-toolbar">
-            <button class="tool-btn active" id="btnBrush"><i class="fa-solid fa-paintbrush"></i></button>
-            <button class="tool-btn" id="btnEraser"><i class="fa-solid fa-eraser"></i></button>
-            <button class="tool-btn" id="btnClear"><i class="fa-solid fa-trash"></i></button>
-            <button class="tool-btn" id="btnUndo"><i class="fa-solid fa-rotate-left"></i></button>
+            <div class="toolbar-controls-row">
+              <button class="tool-btn active" id="btnBrush" title="Pencil Brush"><i class="fa-solid fa-paintbrush"></i></button>
+              <button class="tool-btn" id="btnEraser" title="Eraser"><i class="fa-solid fa-eraser"></i></button>
+              <button class="tool-btn" id="btnClear" title="Clear Canvas"><i class="fa-solid fa-trash"></i></button>
+              <button class="tool-btn" id="btnUndo" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
 
-            <div style="width: 2px; height: 24px; background: #cbd5e1; margin: 0 0.5rem;"></div>
+              <div style="width: 2px; height: 24px; background: #cbd5e1; margin: 0 0.3rem;"></div>
 
-            <!-- Color Palette -->
-            <div class="color-swatch active" style="background: #000000;" data-color="#000000"></div>
-            <div class="color-swatch" style="background: #ff0055;" data-color="#ff0055"></div>
-            <div class="color-swatch" style="background: #0088ff;" data-color="#0088ff"></div>
-            <div class="color-swatch" style="background: #ffcc00;" data-color="#ffcc00"></div>
-            <div class="color-swatch" style="background: #00cc66;" data-color="#00cc66"></div>
-            <div class="color-swatch" style="background: #9933ff;" data-color="#9933ff"></div>
+              <!-- Stroke Size Selector -->
+              <div class="size-selector-group">
+                <button class="size-btn active" data-size="4" title="Small"><div class="size-dot s"></div></button>
+                <button class="size-btn" data-size="8" title="Medium"><div class="size-dot m"></div></button>
+                <button class="size-btn" data-size="14" title="Large"><div class="size-dot l"></div></button>
+                <button class="size-btn" data-size="22" title="Extra Large"><div class="size-dot xl"></div></button>
+              </div>
 
-            <button id="btnSubmitCanvas" class="btn-neo-yellow" style="margin-left: auto; width: auto; padding: 0.5rem 1.2rem; font-size: 0.95rem;">
-              <i class="fa-solid fa-check"></i> Finish Drawing
-            </button>
+              <button id="btnSubmitCanvas" class="btn-neo-yellow" style="margin-left: auto; width: auto; padding: 0.45rem 1.1rem; font-size: 0.95rem;">
+                <i class="fa-solid fa-check"></i> Finish Drawing
+              </button>
+            </div>
+
+            <!-- Complete 24-Color Palette Grid -->
+            <div class="color-palette-grid">
+              <!-- Row 1: Primary & Core Colors -->
+              <div class="color-swatch active" style="background: #000000;" data-color="#000000"></div>
+              <div class="color-swatch" style="background: #ffffff;" data-color="#ffffff"></div>
+              <div class="color-swatch" style="background: #94a3b8;" data-color="#94a3b8"></div>
+              <div class="color-swatch" style="background: #ef4444;" data-color="#ef4444"></div>
+              <div class="color-swatch" style="background: #f97316;" data-color="#f97316"></div>
+              <div class="color-swatch" style="background: #eab308;" data-color="#eab308"></div>
+              <div class="color-swatch" style="background: #22c55e;" data-color="#22c55e"></div>
+              <div class="color-swatch" style="background: #06b6d4;" data-color="#06b6d4"></div>
+              <div class="color-swatch" style="background: #3b82f6;" data-color="#3b82f6"></div>
+              <div class="color-swatch" style="background: #a855f7;" data-color="#a855f7"></div>
+              <div class="color-swatch" style="background: #ec4899;" data-color="#ec4899"></div>
+              <div class="color-swatch" style="background: #78350f;" data-color="#78350f"></div>
+
+              <!-- Row 2: Secondary & Skin Tones -->
+              <div class="color-swatch" style="background: #475569;" data-color="#475569"></div>
+              <div class="color-swatch" style="background: #f87171;" data-color="#f87171"></div>
+              <div class="color-swatch" style="background: #fb923c;" data-color="#fb923c"></div>
+              <div class="color-swatch" style="background: #fde047;" data-color="#fde047"></div>
+              <div class="color-swatch" style="background: #4ade80;" data-color="#4ade80"></div>
+              <div class="color-swatch" style="background: #67e8f9;" data-color="#67e8f9"></div>
+              <div class="color-swatch" style="background: #60a5fa;" data-color="#60a5fa"></div>
+              <div class="color-swatch" style="background: #c084fc;" data-color="#c084fc"></div>
+              <div class="color-swatch" style="background: #f472b6;" data-color="#f472b6"></div>
+              <div class="color-swatch" style="background: #d97706;" data-color="#d97706"></div>
+              <div class="color-swatch" style="background: #fed7aa;" data-color="#fed7aa"></div>
+              <div class="color-swatch" style="background: #451a03;" data-color="#451a03"></div>
+            </div>
           </div>
         </div>
 
