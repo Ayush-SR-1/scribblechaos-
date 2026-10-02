@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScribbleChaos | The Ultimate AI Art Battleground</title>
-  <!-- Google Fonts & Font Awesome Icons -->
+  <title>Pixel Telephone | Three AI Drawing Games</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+  <!-- Animated 3D Paint Strokes & Splash Background Canvas -->
+  <canvas id="bg3dCanvas"></canvas>
 
   <!-- Top Navigation Header -->
   <header class="header-nav">
@@ -20,7 +22,7 @@
     <div class="nav-status">
       <div class="online-badge" id="onlineBadge">
         <span class="online-dot"></span>
-        24/7 Server Live
+        24/7 Live Server
       </div>
       <button class="btn-sound" id="btnSoundToggle">🔊 Sound: ON</button>
     </div>
@@ -29,165 +31,99 @@
   <!-- Main Container -->
   <main class="main-wrapper">
 
-    <!-- PORTAL HOME VIEW -->
-    <div id="portalView">
+    <!-- FRONT PORTAL VIEW (Reference Design) -->
+    <div id="portalView" style="width: 100%;">
       
-      <!-- HERO CANVAS: Top Split-Screen Section -->
-      <section class="hero-split">
-        <!-- Left Side: Headline & Matchmaking Bar -->
-        <div class="hero-left">
-          <span class="headline-badge">🔥 LIVE MULTIPLAYER ARENA</span>
-          <h2 class="hero-title">
-            The Ultimate <br>
-            <span>AI Art Battleground</span>
-          </h2>
-          <p class="hero-subtitle">
-            Draw, describe, and outsmart our sarcastic AI judge in real-time speed battles. 
-            Join thousands of artists in hilarious multi-round drawing chaos!
-          </p>
-
-          <!-- Pulsing Quick Match Matchmaking Bar -->
-          <div class="quick-match-bar">
-            <div class="quick-match-info">
-              <div class="quick-match-title">⚡ QUICK MATCHMAKING</div>
-              <div class="quick-match-sub">Auto-find an open lobby in 3 seconds...</div>
-            </div>
-            <button class="btn-quick-match" id="btnQuickMatch">
-              <i class="fa-solid fa-bolt"></i> Quick Match
-            </button>
-          </div>
+      <!-- Title Block with Yellow Highlight Box behind "Pixel" -->
+      <div class="portal-header-block">
+        <div class="portal-title-row">
+          <span class="title-highlight-box">Pixel</span>
+          <span class="title-main-text">Telephone</span>
         </div>
+        <p class="portal-subtitle">Three drawing games with an AI in the room.</p>
+      </div>
 
-        <!-- Right Side: Looping Visual Sketch Showcase & AI Speech Bubble -->
-        <div class="hero-right">
-          <div class="ai-speech-bubble" id="heroSpeechBubble">
-            Wait, is that supposed to be a cat or a radioactive triangle? 🤖
-          </div>
+      <!-- Neobrutalist Main Portal Card Frame -->
+      <div class="portal-card-frame">
+        
+        <!-- Player Name Input -->
+        <input type="text" id="playerNameInput" class="neo-input" placeholder="Your name" value="ScribbleMaster">
 
-          <div class="showcase-card">
-            <div class="showcase-canvas-demo">
-              <svg width="240" height="180" viewBox="0 0 240 180" id="demoCanvasSvg">
-                <rect width="100%" height="100%" fill="#ffffff" />
-                <path d="M 40 130 C 50 70, 90 60, 110 90 C 130 120, 170 50, 200 130 Z" fill="none" stroke="#ff007f" stroke-width="6" stroke-linecap="round" />
-                <circle cx="90" cy="80" r="10" fill="#00f0ff" />
-                <circle cx="150" cy="80" r="10" fill="#00f0ff" />
-                <path d="M 100 110 Q 120 135 140 110" fill="none" stroke="#ffe600" stroke-width="5" stroke-linecap="round" />
-              </svg>
-            </div>
-            <div class="ai-avatar-badge">
-              <i class="fa-solid fa-robot"></i> AI Judge Sarcasm: 85%
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- GAME MODE SELECTION: 3-Column Layout with High-Contrast Neon Cards -->
-      <section style="margin-top: 2.5rem;">
-        <div class="section-title-container" style="margin-bottom: 2rem;">
-          <h3 class="section-title">Select Game Mode</h3>
-          <p class="section-subtitle">Choose your battle format and challenge players worldwide</p>
-        </div>
-
-        <div class="game-modes-grid">
+        <!-- 3 Mode Selection Radio Cards -->
+        <div class="mode-selection-list">
           
-          <!-- Mode 1: AI Judges Your Drawing -->
-          <div class="mode-card" data-mode="ai_judges">
-            <div>
-              <div class="mode-icon-box">
-                <i class="fa-solid fa-pen-ruler"></i>
-              </div>
-              <h4 class="mode-card-title">AI Judges Your Drawing</h4>
-              <p class="mode-card-desc">
-                You draw, AI guesses. Multiplayer rooms with speed scoring. 
-                <br><br>
-                <strong>Twist:</strong> The longer the AI takes, the cockier and more sarcastic its commentary gets!
-              </p>
-              <span class="mode-tag">Speed Scoring & Sarcasm</span>
+          <!-- Mode 1: Pixel Telephone -->
+          <div class="mode-radio-card" data-mode="pixel_telephone">
+            <input type="radio" name="gameMode" value="pixel_telephone" class="mode-radio-input" id="radioTelephone">
+            <div class="mode-info-block">
+              <div class="mode-title">Pixel Telephone</div>
+              <div class="mode-desc">Draw, describe, redraw. Watch it go wrong.</div>
             </div>
-            <button class="btn-play-mode">
-              <i class="fa-solid fa-play"></i> Play Mode
-            </button>
           </div>
 
-          <!-- Mode 2: Blind Artist -->
-          <div class="mode-card" data-mode="blind_artist">
-            <div>
-              <div class="mode-icon-box">
-                <i class="fa-solid fa-eye-slash"></i>
-              </div>
-              <h4 class="mode-card-title">Blind Artist</h4>
-              <p class="mode-card-desc">
-                One player describes an image in text, others draw it blindly. 
-                <br><br>
-                AI evaluates and scores whose canvas matched the secret description best. No one sees the original!
-              </p>
-              <span class="mode-tag">Blind Matching & AI Score</span>
+          <!-- Mode 2: AI Judges Your Drawing -->
+          <div class="mode-radio-card" data-mode="ai_judges">
+            <input type="radio" name="gameMode" value="ai_judges" class="mode-radio-input" id="radioAIJudges">
+            <div class="mode-info-block">
+              <div class="mode-title">AI Judges Your Drawing</div>
+              <div class="mode-desc">The AI guesses fast and gets cockier each miss. Needs AI.</div>
             </div>
-            <button class="btn-play-mode">
-              <i class="fa-solid fa-play"></i> Play Mode
-            </button>
           </div>
 
-          <!-- Mode 3: Pixel Telephone -->
-          <div class="mode-card" data-mode="pixel_telephone">
-            <div>
-              <div class="mode-icon-box">
-                <i class="fa-solid fa-link"></i>
-              </div>
-              <h4 class="mode-card-title">Pixel Telephone</h4>
-              <p class="mode-card-desc">
-                Player 1 draws → Player 2 describes → Player 3 draws from description → repeat. 
-                <br><br>
-                Watch how hilariously distorted and wrong the art gets by round 5!
-              </p>
-              <span class="mode-tag">Multi-Round Chain Decay</span>
+          <!-- Mode 3: Blind Artist (Default Selected Yellow State) -->
+          <div class="mode-radio-card selected" data-mode="blind_artist">
+            <input type="radio" name="gameMode" value="blind_artist" class="mode-radio-input" id="radioBlindArtist" checked>
+            <div class="mode-info-block">
+              <div class="mode-title">Blind Artist</div>
+              <div class="mode-desc">Describe a secret scene. Others draw it. AI scores. Needs AI.</div>
             </div>
-            <button class="btn-play-mode">
-              <i class="fa-solid fa-play"></i> Play Mode
-            </button>
           </div>
 
         </div>
-      </section>
 
-      <!-- TEAM ACTIONS SECTION: Bottom Action Panel -->
-      <section class="team-actions-panel">
-        <div class="panel-header">
-          <h4 class="panel-title">Squad & Multiplayer Hub</h4>
-          <p class="panel-sub">Host a custom battle room or return to main navigation</p>
-        </div>
+        <!-- Create Room Action Button -->
+        <button class="btn-neo-yellow" id="btnCreateRoomSubmit">
+          Create room
+        </button>
 
-        <div class="action-buttons-row">
-          <!-- Prominent Stylized Button: Create a Room / Team -->
-          <button class="btn-create-room" id="btnCreateRoom">
-            <i class="fa-solid fa-users-gear"></i> Create a Room / Team
-          </button>
+        <!-- Dotted Divider -->
+        <hr class="dotted-divider">
 
-          <!-- Clear Yellow "Back" Button for Global Navigation -->
-          <button class="btn-back-global" id="btnBackGlobal">
-            <i class="fa-solid fa-arrow-left"></i> Back
+        <!-- Room Code & Join Room Action Row -->
+        <div class="join-room-row">
+          <input type="text" id="joinRoomCodeInput" class="neo-input" placeholder="ROOM CODE" style="text-transform: uppercase;">
+          <button class="btn-neo-white" id="btnJoinRoomSubmit">
+            Join room
           </button>
         </div>
-      </section>
+
+      </div>
+
+      <!-- Global Yellow Back Button -->
+      <div class="global-bottom-actions">
+        <button class="btn-back-global" id="btnBackGlobal">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </button>
+      </div>
 
     </div>
 
     <!-- ROOM LOBBY VIEW -->
-    <div id="lobbyView" style="display: none;">
+    <div id="lobbyView" style="display: none; width: 100%;">
       <div class="game-header-bar">
         <div>
-          <h3 style="font-family: var(--font-display); color: var(--neon-cyan); font-size: 1.8rem;">
-            ROOM CODE: <span id="lobbyCodeDisplay" style="color: var(--neon-yellow);">------</span>
+          <h3 style="font-family: var(--font-display); font-size: 1.8rem;">
+            ROOM CODE: <span id="lobbyCodeDisplay" style="background: var(--color-yellow); padding: 0.2rem 0.6rem; border-radius: 6px; border: 2px solid var(--color-navy);">------</span>
           </h3>
-          <span class="mode-tag" id="lobbyModeBadge">MODE: AI JUDGES</span>
+          <span style="font-weight: 700; color: var(--color-muted);" id="lobbyModeBadge">MODE: BLIND ARTIST</span>
         </div>
-        <button class="btn-quick-match" id="btnLobbyStart" style="display: none; background: var(--neon-pink); color: #fff;">
-          <i class="fa-solid fa-play"></i> Start Game
+        <button class="btn-neo-yellow" id="btnLobbyStart" style="display: none; width: auto; padding: 0.7rem 1.5rem;">
+          Start Game
         </button>
       </div>
 
-      <div style="margin-top: 2rem; background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
-        <h4 style="margin-bottom: 1rem; color: var(--text-muted);">Players in Room (<span id="playerCount">1</span>/8):</h4>
+      <div style="margin-top: 1.5rem; background: #ffffff; padding: 2rem; border-radius: 16px; border: 3px solid var(--color-navy); box-shadow: var(--shadow-neo);">
+        <h4 style="margin-bottom: 1rem; color: var(--color-navy);">Players in Room (<span id="playerCount">1</span>/8):</h4>
         <div id="lobbyPlayersList" style="display: flex; flex-direction: column; gap: 0.8rem;">
           <!-- Dynamically populated -->
         </div>
@@ -207,20 +143,12 @@
         </div>
       </div>
 
-      <!-- Sarcastic AI Cockiness Bar -->
-      <div class="cockiness-container">
-        <span class="cockiness-label" id="cockinessLabel">AI Cockiness: 15%</span>
-        <div class="cockiness-progress-bg">
-          <div class="cockiness-progress-fill" id="cockinessFill" style="width: 15%;"></div>
-        </div>
-      </div>
-
       <!-- Mode 2 & Mode 3 Interactive Action Boxes -->
       <div id="mode2BlindBox" style="display: none;">
-        <div style="background: var(--bg-card); border: 2px solid var(--neon-pink); padding: 1.2rem; border-radius: 12px; display: flex; gap: 1rem; align-items: center;">
-          <input type="text" id="blindDescInput" class="form-input" placeholder="Type a detailed text description for others to draw..." style="flex: 1;">
-          <button id="btnSubmitBlindDesc" class="btn-play-mode" style="width: auto; background: var(--neon-pink); color: #fff; padding: 0.8rem 1.5rem;">
-            Submit Description
+        <div style="background: #ffffff; border: 3px solid var(--color-navy); padding: 1.2rem; border-radius: 16px; box-shadow: var(--shadow-neo); display: flex; gap: 1rem; align-items: center;">
+          <input type="text" id="blindDescInput" class="neo-input" placeholder="Type a secret scene description..." style="flex: 1;">
+          <button id="btnSubmitBlindDesc" class="btn-neo-yellow" style="width: auto; padding: 0.8rem 1.5rem; font-size: 1rem;">
+            Submit Scene
           </button>
         </div>
       </div>
@@ -231,7 +159,7 @@
       <div class="canvas-workspace">
         
         <div>
-          <!-- HTML5 Canvas Container -->
+          <!-- HTML5 Canvas Board -->
           <div class="canvas-board-wrapper">
             <canvas id="mainCanvas"></canvas>
           </div>
@@ -243,23 +171,23 @@
             <button class="tool-btn" id="btnClear"><i class="fa-solid fa-trash"></i></button>
             <button class="tool-btn" id="btnUndo"><i class="fa-solid fa-rotate-left"></i></button>
 
-            <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.2); margin: 0 0.5rem;"></div>
+            <div style="width: 2px; height: 24px; background: #cbd5e1; margin: 0 0.5rem;"></div>
 
             <!-- Color Palette -->
             <div class="color-swatch active" style="background: #000000;" data-color="#000000"></div>
-            <div class="color-swatch" style="background: #00f0ff;" data-color="#00f0ff"></div>
-            <div class="color-swatch" style="background: #ff007f;" data-color="#ff007f"></div>
-            <div class="color-swatch" style="background: #ffe600;" data-color="#ffe600"></div>
-            <div class="color-swatch" style="background: #39ff14;" data-color="#39ff14"></div>
-            <div class="color-swatch" style="background: #9d4edd;" data-color="#9d4edd"></div>
+            <div class="color-swatch" style="background: #ff0055;" data-color="#ff0055"></div>
+            <div class="color-swatch" style="background: #0088ff;" data-color="#0088ff"></div>
+            <div class="color-swatch" style="background: #ffcc00;" data-color="#ffcc00"></div>
+            <div class="color-swatch" style="background: #00cc66;" data-color="#00cc66"></div>
+            <div class="color-swatch" style="background: #9933ff;" data-color="#9933ff"></div>
 
-            <button id="btnSubmitCanvas" class="btn-play-mode" style="margin-left: auto; width: auto; background: var(--neon-green); color: #000; padding: 0.5rem 1.2rem; font-size: 0.9rem;">
-              <i class="fa-solid fa-check"></i> Finish Canvas
+            <button id="btnSubmitCanvas" class="btn-neo-yellow" style="margin-left: auto; width: auto; padding: 0.5rem 1.2rem; font-size: 0.95rem;">
+              <i class="fa-solid fa-check"></i> Finish Drawing
             </button>
           </div>
         </div>
 
-        <!-- Live Guesses & Sarcastic AI Commentary Sidebar -->
+        <!-- Sidebar Guess & Chat Panel -->
         <div class="sidebar-panel">
           <div class="sidebar-title">
             <i class="fa-solid fa-comments"></i> Live AI Guesses & Chat
@@ -270,9 +198,9 @@
           </div>
 
           <!-- Mode 1 Guess Input Box -->
-          <div class="guess-input-box" id="mode1GuessBox">
-            <input type="text" id="guessInput" class="form-input" placeholder="Type your guess..." style="flex: 1;">
-            <button id="btnSendGuess" class="btn-quick-match" style="padding: 0.8rem 1rem;">
+          <div class="join-room-row" id="mode1GuessBox">
+            <input type="text" id="guessInput" class="neo-input" placeholder="Type your guess..." style="flex: 1;">
+            <button id="btnSendGuess" class="btn-neo-yellow" style="width: auto; padding: 0.8rem 1rem;">
               <i class="fa-solid fa-paper-plane"></i>
             </button>
           </div>
@@ -282,13 +210,13 @@
 
     </div>
 
-    <!-- REVEAL GALLERY VIEW (Mode 3 Telephone Chain) -->
-    <div id="revealGalleryView" style="display: none;">
+    <!-- REVEAL GALLERY VIEW -->
+    <div id="revealGalleryView" style="display: none; width: 100%;">
       <div style="text-align: center; margin-bottom: 2rem;">
-        <h2 style="font-family: var(--font-display); font-size: 2.5rem; color: var(--neon-pink);">
+        <h2 style="font-family: var(--font-display); font-size: 2.5rem; color: #ffffff; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">
           🎭 Pixel Telephone Chain Reveal
         </h2>
-        <p id="telephoneSummary" style="color: var(--neon-yellow); font-size: 1.2rem; margin-top: 0.5rem;"></p>
+        <p id="telephoneSummary" style="color: var(--color-yellow); font-size: 1.2rem; margin-top: 0.5rem; font-weight: 700;"></p>
       </div>
 
       <div id="telephoneGallery" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
@@ -298,48 +226,9 @@
 
   </main>
 
-  <!-- CREATE ROOM MODAL -->
-  <div class="modal-overlay" id="createRoomModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 class="modal-title">Create Battle Room</h3>
-        <button class="btn-close-modal" id="btnCloseModal">&times;</button>
-      </div>
-
-      <form id="createRoomForm" style="display: flex; flex-direction: column; gap: 1.2rem;">
-        <div class="form-group">
-          <label class="form-label">Your Artist Handle</label>
-          <input type="text" id="playerNameInput" class="form-input" value="ScribbleMaster" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Game Mode</label>
-          <select id="roomModeSelect" class="form-select">
-            <option value="ai_judges">AI Judges Your Drawing (Speed & Cockiness)</option>
-            <option value="blind_artist">Blind Artist (Text Prompt Match)</option>
-            <option value="pixel_telephone">Pixel Telephone (Distortion Chain)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Max Players</label>
-          <select id="maxPlayersSelect" class="form-select">
-            <option value="4">4 Players</option>
-            <option value="8" selected>8 Players</option>
-            <option value="12">12 Players</option>
-          </select>
-        </div>
-
-        <button type="submit" class="btn-create-room" style="width: 100%; margin-top: 0.5rem;">
-          <i class="fa-solid fa-gamepad"></i> Launch Room
-        </button>
-      </form>
-    </div>
-  </div>
-
   <!-- Footer -->
   <footer class="footer-bar">
-    <p>ScribbleChaos AI Art Battleground &copy; 2026. Built with Node.js, Express, Socket.IO & HTML5 Canvas.</p>
+    <p>Pixel Telephone &copy; 2026. Powered by Node.js, Socket.IO & 3D Animated Paint Canvas Engine.</p>
   </footer>
 
   <!-- Scripts -->
@@ -347,6 +236,7 @@
   <script src="js/sound.js"></script>
   <script src="js/canvas.js"></script>
   <script src="js/socket-client.js"></script>
+  <script src="js/bg-3d.js"></script>
   <script src="js/app.js"></script>
 
 </body>

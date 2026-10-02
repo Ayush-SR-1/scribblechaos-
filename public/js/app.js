@@ -1,60 +1,53 @@
-// Main Application Orchestrator for ScribbleChaos
+// Main Application Orchestrator for ScribbleChaos / Pixel Telephone
 class ScribbleApp {
   constructor() {
-    this.currentView = 'home'; // 'home', 'lobby', 'game_mode1', 'game_mode2', 'game_mode3', 'reveal'
-    this.selectedMode = 'ai_judges';
-    this.cockinessMeter = 15;
-    this.mockShowcaseIndex = 0;
-
-    this.mockComments = [
-      "Wait, is that supposed to be a cat or a radioactive triangle?",
-      "I run 100 billion parameters and still can't comprehend this shape!",
-      "If art is subjective, this drawing is asking for an appeal.",
-      "My confidence score just plummeted into negative infinity!"
-    ];
+    this.currentView = 'home';
+    this.selectedMode = 'blind_artist';
 
     this.init();
   }
 
   init() {
-    console.log('🚀 ScribbleChaos UI App Initialized');
-    
-    // Bind DOM events
+    console.log('🚀 Pixel Telephone UI App Initialized');
     this.bindDOMEvents();
-    
-    // Start Hero Canvas looping showcase animation
-    this.startHeroShowcaseAnimation();
-
-    // Init socket client connection
     if (window.socketClient) window.socketClient.init();
   }
 
   bindDOMEvents() {
-    // Quick Match Button
-    const btnQuickMatch = document.getElementById('btnQuickMatch');
-    if (btnQuickMatch) {
-      btnQuickMatch.addEventListener('click', () => {
-        if (window.soundEngine) window.soundEngine.playClick();
-        this.startQuickMatch();
-      });
-    }
-
-    // Game Mode Selection Cards
-    const modeCards = document.querySelectorAll('.mode-card');
-    modeCards.forEach(card => {
-      card.addEventListener('click', (e) => {
+    // Mode Radio Selection Card Clicks & Highlight toggles
+    const radioCards = document.querySelectorAll('.mode-radio-card');
+    radioCards.forEach(card => {
+      card.addEventListener('click', () => {
         const mode = card.getAttribute('data-mode');
+        this.selectedMode = mode;
+
+        radioCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+
+        const radioInput = card.querySelector('input[type="radio"]');
+        if (radioInput) radioInput.checked = true;
+
         if (window.soundEngine) window.soundEngine.playClick();
-        this.openCreateRoomModal(mode);
       });
     });
 
-    // Create Room / Team Button (Bottom Panel)
-    const btnCreateRoom = document.getElementById('btnCreateRoom');
-    if (btnCreateRoom) {
-      btnCreateRoom.addEventListener('click', () => {
+    // Create Room Button Submit
+    const btnCreateRoomSubmit = document.getElementById('btnCreateRoomSubmit');
+    if (btnCreateRoomSubmit) {
+      btnCreateRoomSubmit.addEventListener('click', () => {
         if (window.soundEngine) window.soundEngine.playClick();
-        this.openCreateRoomModal('ai_judges');
+        this.handleCreateRoom();
+      });
+    }
+
+    // Join Room Button Submit
+    const btnJoinRoomSubmit = document.getElementById('btnJoinRoomSubmit');
+    const joinCodeInput = document.getElementById('joinRoomCodeInput');
+    if (btnJoinRoomSubmit) {
+      btnJoinRoomSubmit.addEventListener('click', () => {
+        if (window.soundEngine) window.soundEngine.playClick();
+        const code = joinCodeInput ? joinCodeInput.value.trim().toUpperCase() : '';
+        if (code) this.handleJoinRoom(code);
       });
     }
 
@@ -67,21 +60,7 @@ class ScribbleApp {
       });
     }
 
-    // Modal Close Button & Form Submit
-    const btnCloseModal = document.getElementById('btnCloseModal');
-    if (btnCloseModal) {
-      btnCloseModal.addEventListener('click', () => this.closeModal());
-    }
-
-    const modalForm = document.getElementById('createRoomForm');
-    if (modalForm) {
-      modalForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        this.handleCreateRoomSubmit();
-      });
-    }
-
-    // Sound Toggle
+    // Sound Toggle Button
     const btnSound = document.getElementById('btnSoundToggle');
     if (btnSound) {
       btnSound.addEventListener('click', () => {
@@ -92,7 +71,7 @@ class ScribbleApp {
       });
     }
 
-    // Guess submission input
+    // Guess input box
     const guessInput = document.getElementById('guessInput');
     const btnSendGuess = document.getElementById('btnSendGuess');
     if (btnSendGuess && guessInput) {
@@ -109,7 +88,7 @@ class ScribbleApp {
       });
     }
 
-    // Mode 2 Blind Description Submit
+    // Mode 2 Blind Scene Description Submit
     const btnSubmitBlindDesc = document.getElementById('btnSubmitBlindDesc');
     if (btnSubmitBlindDesc) {
       btnSubmitBlindDesc.addEventListener('click', () => {
@@ -121,7 +100,7 @@ class ScribbleApp {
       });
     }
 
-    // Mode 2 & 3 Submit Drawing
+    // Submit Drawing Canvas
     const btnSubmitCanvas = document.getElementById('btnSubmitCanvas');
     if (btnSubmitCanvas) {
       btnSubmitCanvas.addEventListener('click', () => {
@@ -133,20 +112,7 @@ class ScribbleApp {
       });
     }
 
-    // Mode 3 Submit Description
-    const btnSubmitTelephoneDesc = document.getElementById('btnSubmitTelephoneDesc');
-    if (btnSubmitTelephoneDesc) {
-      btnSubmitTelephoneDesc.addEventListener('click', () => {
-        const input = document.getElementById('telephoneDescInput');
-        if (input && input.value.trim() && window.socketClient && window.socketClient.currentRoom) {
-          window.socketClient.submitTelephoneDescription(window.socketClient.currentRoom.code, input.value.trim());
-          if (window.soundEngine) window.soundEngine.playClick();
-          input.value = '';
-        }
-      });
-    }
-
-    // Start Game from Lobby Button
+    // Start Game from Lobby
     const btnLobbyStart = document.getElementById('btnLobbyStart');
     if (btnLobbyStart) {
       btnLobbyStart.addEventListener('click', () => {
@@ -158,67 +124,17 @@ class ScribbleApp {
     }
   }
 
-  // Hero Canvas Looping Visual Sketch Showcase Animation
-  startHeroShowcaseAnimation() {
-    const speechEl = document.getElementById('heroSpeechBubble');
-    const demoCanvas = document.getElementById('demoCanvasSvg');
-
-    setInterval(() => {
-      this.mockShowcaseIndex = (this.mockShowcaseIndex + 1) % this.mockComments.length;
-      if (speechEl) {
-        speechEl.style.transform = 'scale(0.9)';
-        speechEl.style.opacity = '0.5';
-        setTimeout(() => {
-          speechEl.innerText = this.mockComments[this.mockShowcaseIndex];
-          speechEl.style.transform = 'scale(1)';
-          speechEl.style.opacity = '1';
-        }, 200);
-      }
-    }, 4500);
+  getPlayerName() {
+    const input = document.getElementById('playerNameInput');
+    const val = input ? input.value.trim() : '';
+    return val || `Artist_${Math.floor(Math.random() * 899 + 100)}`;
   }
 
-  openCreateRoomModal(mode) {
-    this.selectedMode = mode;
-    const modal = document.getElementById('createRoomModal');
-    const modeSelect = document.getElementById('roomModeSelect');
-    if (modeSelect) modeSelect.value = mode;
-    if (modal) modal.classList.add('active');
-  }
-
-  closeModal() {
-    const modal = document.getElementById('createRoomModal');
-    if (modal) modal.classList.remove('active');
-  }
-
-  handleCreateRoomSubmit() {
-    const nameInput = document.getElementById('playerNameInput');
-    const modeSelect = document.getElementById('roomModeSelect');
-    const playersSelect = document.getElementById('maxPlayersSelect');
-
-    const playerName = nameInput ? nameInput.value.trim() : 'Player';
-    const mode = modeSelect ? modeSelect.value : 'ai_judges';
-    const maxPlayers = playersSelect ? playersSelect.value : 8;
-
+  handleCreateRoom() {
+    const playerName = this.getPlayerName();
     if (window.socketClient) {
       window.socketClient.playerName = playerName;
-      localStorage.setItem('scribble_player_name', playerName);
-
-      window.socketClient.createRoom(mode, maxPlayers, 60, (res) => {
-        if (res && res.success) {
-          this.closeModal();
-          this.showLobbyView(res.room);
-        }
-      });
-    }
-  }
-
-  startQuickMatch() {
-    const nameInput = document.getElementById('playerNameInput');
-    const playerName = (nameInput && nameInput.value.trim()) || `Scrubber_${Math.floor(Math.random()*899+100)}`;
-    
-    if (window.socketClient) {
-      window.socketClient.playerName = playerName;
-      window.socketClient.quickMatch((res) => {
+      window.socketClient.createRoom(this.selectedMode, 8, 60, (res) => {
         if (res && res.success) {
           this.showLobbyView(res.room);
         }
@@ -226,7 +142,20 @@ class ScribbleApp {
     }
   }
 
-  // Navigation Logic
+  handleJoinRoom(code) {
+    const playerName = this.getPlayerName();
+    if (window.socketClient) {
+      window.socketClient.playerName = playerName;
+      window.socketClient.joinRoom(code, (res) => {
+        if (res && res.success) {
+          this.showLobbyView(res.room);
+        } else {
+          alert((res && res.error) || 'Could not join room!');
+        }
+      });
+    }
+  }
+
   goBackToHome() {
     this.currentView = 'home';
     document.getElementById('portalView').style.display = 'block';
@@ -253,20 +182,20 @@ class ScribbleApp {
     if (!listEl) return;
 
     listEl.innerHTML = room.players.map(p => `
-      <div style="background:rgba(255,255,255,0.05); padding:0.8rem 1.2rem; border-radius:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(0,240,255,0.2);">
-        <span style="font-weight:700; color:#fff;">${p.name} ${p.isHost ? '👑 (Host)' : ''}</span>
-        <span style="color:var(--neon-green); font-weight:800;">READY</span>
+      <div style="background:#f8fafc; padding:0.8rem 1.2rem; border-radius:10px; display:flex; justify-content:space-between; align-items:center; border:2px solid var(--color-navy); color:var(--color-navy);">
+        <span style="font-weight:700;">${p.name} ${p.isHost ? '👑 (Host)' : ''}</span>
+        <span style="color:var(--color-navy); font-weight:800; background:var(--color-yellow); padding:0.2rem 0.6rem; border-radius:6px; border:1px solid #000;">READY</span>
       </div>
     `).join('');
 
     const startBtn = document.getElementById('btnLobbyStart');
     if (startBtn) {
       const isHost = socketClient.socket && socketClient.socket.id === room.hostId;
-      startBtn.style.display = isHost ? 'block' : 'none';
+      startBtn.style.display = isHost ? 'inline-block' : 'none';
     }
   }
 
-  // Socket event callbacks
+  // Socket Event Callbacks
   onRoomUpdated(room) {
     if (this.currentView === 'lobby') {
       this.renderLobbyPlayers(room);
@@ -280,7 +209,6 @@ class ScribbleApp {
     document.getElementById('revealGalleryView').style.display = 'none';
     document.getElementById('gameArenaView').classList.add('active');
 
-    // Setup Canvas
     const canvasEl = document.getElementById('mainCanvas');
     if (canvasEl && !window.scribbleCanvas) {
       window.scribbleCanvas = new ScribbleCanvas(canvasEl);
@@ -293,14 +221,12 @@ class ScribbleApp {
       window.scribbleCanvas.clear();
     }
 
-    // Set Header info
     document.getElementById('promptText').innerText = `Prompt: ${data.prompt}`;
     document.getElementById('timerDisplay').innerText = `${data.timeLimit}s`;
     document.getElementById('guessesFeed').innerHTML = `
-      <div class="guess-msg ai">🤖 AI Judge joined the room! Sarcasm meter initialised at 15%.</div>
+      <div class="guess-msg ai">🤖 AI Judge joined the room! Sarcasm meter initialised.</div>
     `;
 
-    // Configure mode specific UI controls
     const isMode1 = data.mode === 'ai_judges';
     const isMode2 = data.mode === 'blind_artist';
     const isMode3 = data.mode === 'pixel_telephone';
@@ -321,12 +247,6 @@ class ScribbleApp {
 
   onAICommentary(data) {
     const feed = document.getElementById('guessesFeed');
-    const cockinessFill = document.getElementById('cockinessFill');
-    const cockinessLabel = document.getElementById('cockinessLabel');
-
-    if (cockinessFill) cockinessFill.style.width = `${data.cockinessPercent}%`;
-    if (cockinessLabel) cockinessLabel.innerText = `AI Cockiness: ${data.cockinessPercent}%`;
-
     if (feed) {
       const msg = document.createElement('div');
       msg.className = 'guess-msg ai';
@@ -334,7 +254,6 @@ class ScribbleApp {
       feed.appendChild(msg);
       feed.scrollTop = feed.scrollHeight;
     }
-
     if (window.soundEngine) window.soundEngine.playAICockyBuzz();
   }
 
@@ -359,10 +278,10 @@ class ScribbleApp {
     const blindBox = document.getElementById('mode2BlindBox');
     if (blindBox) {
       blindBox.innerHTML = `
-        <div style="background:rgba(255,0,127,0.15); border:1px solid var(--neon-pink); padding:1rem; border-radius:10px; color:#fff;">
-          <strong>👁️ Secret Description Received:</strong>
-          <p style="margin-top:0.4rem; font-size:1.1rem; color:var(--neon-yellow);">"${data.description}"</p>
-          <small style="color:var(--text-muted)">Draw what you hear! AI will judge the match score.</small>
+        <div style="background:#ffffff; border:3px solid var(--color-navy); padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-neo); color:var(--color-navy);">
+          <strong>👁️ Secret Scene Description Received:</strong>
+          <p style="margin-top:0.4rem; font-size:1.15rem; background:var(--color-yellow); padding:0.4rem 0.8rem; border-radius:8px; border:2px solid #000; font-weight:800;">"${data.description}"</p>
+          <small style="color:var(--color-muted); display:block; margin-top:0.4rem;">Draw what you hear! AI will judge the match score.</small>
         </div>
       `;
     }
@@ -388,19 +307,30 @@ class ScribbleApp {
     const box = document.getElementById('mode3TelephoneBox');
     if (box) {
       box.innerHTML = isMyTurn ? `
-        <div style="background:rgba(57,255,20,0.15); border:1px solid var(--neon-green); padding:1rem; border-radius:10px;">
-          <h4 style="color:var(--neon-green);">IT'S YOUR TURN!</h4>
+        <div style="background:#ffffff; border:3px solid var(--color-navy); padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-neo);">
+          <h4 style="color:var(--color-navy); font-size:1.2rem;">IT'S YOUR TURN!</h4>
           <p style="margin-top:0.4rem;">Previous input: <em>"${data.previousContent}"</em></p>
           ${data.turnType === 'describe' ? `
-            <input type="text" id="telephoneDescInput" class="form-input" placeholder="Describe the drawing above..." style="width:100%; margin-top:0.8rem;">
-            <button id="btnSubmitTelephoneDesc" class="btn-play-mode" style="margin-top:0.5rem;">Submit Description</button>
+            <input type="text" id="telephoneDescInput" class="neo-input" placeholder="Describe the drawing above..." style="width:100%; margin-top:0.8rem;">
+            <button id="btnSubmitTelephoneDesc" class="btn-neo-yellow" style="margin-top:0.6rem; font-size:1rem;">Submit Description</button>
           ` : `
-            <p>Draw based on the description above!</p>
+            <p style="margin-top:0.4rem; font-weight:700;">Draw based on the description above!</p>
           `}
         </div>
       ` : `
-        <p style="color:var(--text-muted)">Waiting for ${data.nextPlayerName} to complete their ${data.turnType} turn...</p>
+        <p style="color:rgba(255,255,255,0.9); font-weight:700; text-shadow:0 2px 4px #000;">Waiting for ${data.nextPlayerName} to complete their ${data.turnType} turn...</p>
       `;
+
+      const btnSubmitTelephoneDesc = document.getElementById('btnSubmitTelephoneDesc');
+      if (btnSubmitTelephoneDesc) {
+        btnSubmitTelephoneDesc.addEventListener('click', () => {
+          const input = document.getElementById('telephoneDescInput');
+          if (input && input.value.trim() && window.socketClient && window.socketClient.currentRoom) {
+            window.socketClient.submitTelephoneDescription(window.socketClient.currentRoom.code, input.value.trim());
+            if (window.soundEngine) window.soundEngine.playClick();
+          }
+        });
+      }
     }
   }
 
@@ -416,12 +346,12 @@ class ScribbleApp {
     const galleryContainer = document.getElementById('telephoneGallery');
     if (galleryContainer) {
       galleryContainer.innerHTML = data.chain.map((step, idx) => `
-        <div style="background:var(--bg-card); border:2px solid var(--neon-cyan); border-radius:12px; padding:1.25rem; display:flex; flex-direction:column; gap:0.75rem; align-items:center;">
-          <span class="mode-tag" style="background:var(--neon-cyan); color:#000;">Round Step ${idx + 1}: ${step.type.toUpperCase()}</span>
+        <div style="background:#ffffff; border:3px solid var(--color-navy); border-radius:16px; box-shadow:var(--shadow-neo); padding:1.25rem; display:flex; flex-direction:column; gap:0.75rem; align-items:center; color:var(--color-navy);">
+          <span style="background:var(--color-yellow); color:#000; font-weight:900; padding:0.3rem 0.8rem; border-radius:8px; border:2px solid #000;">Step ${idx + 1}: ${step.type.toUpperCase()}</span>
           <p style="font-weight:700;">Player: ${step.playerName}</p>
           ${step.type === 'draw' 
-            ? `<img src="${step.content}" style="width:100%; max-width:280px; border-radius:8px; border:1px solid #fff;" />` 
-            : `<div style="background:#000; padding:1rem; border-radius:8px; width:100%; text-align:center; font-size:1.1rem; color:var(--neon-yellow);">"${step.content}"</div>`}
+            ? `<img src="${step.content}" style="width:100%; max-width:280px; border-radius:8px; border:2px solid #000;" />` 
+            : `<div style="background:#0f172a; padding:1rem; border-radius:8px; width:100%; text-align:center; font-size:1.1rem; color:var(--color-yellow); font-weight:800;">"${step.content}"</div>`}
         </div>
       `).join('');
     }
