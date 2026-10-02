@@ -1,4 +1,4 @@
-/* ScribbleChaos - Ultra-Modern Neobrutalist Design with Profile Page & Settings */
+/* ScribbleChaos - Ultra-Modern Neobrutalist Design with Fixed Alignment */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700;900&display=swap');
 
 :root {
@@ -79,7 +79,7 @@ body {
   letter-spacing: -0.5px;
 }
 
-/* Settings Top Right Icon Button */
+/* Settings Icon Button */
 .btn-settings-icon {
   background: var(--color-yellow);
   color: var(--color-navy);
@@ -114,7 +114,7 @@ body {
   align-items: center;
 }
 
-/* Title Block with Yellow Highlight Box behind "Pixel" */
+/* Title Block */
 .portal-header-block {
   text-align: center;
   display: flex;
@@ -207,47 +207,53 @@ body {
   cursor: pointer;
 }
 
-/* Avatar Customizer Box */
+/* Avatar Customizer Box - Fixed Layout */
 .avatar-customizer-box {
   background: #2563eb;
   border: 2.5px solid var(--color-navy);
   border-radius: 16px;
-  padding: 1.25rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1.5rem;
   position: relative;
   box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
 }
 
+.avatar-left-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.avatar-display-area {
+  width: 86px;
+  height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(3px 4px 0px #0f172a);
+}
+
 .btn-dice-random {
-  position: absolute;
-  top: 10px;
-  right: 12px;
   background: #ffffff;
-  border: 2px solid var(--color-navy);
+  border: 2.5px solid var(--color-navy);
   border-radius: 8px;
   width: 36px;
   height: 36px;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   cursor: pointer;
   transition: transform 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 2px 2px 0px var(--color-navy);
 }
 .btn-dice-random:hover {
   transform: rotate(180deg) scale(1.1);
   background: var(--color-yellow);
-}
-
-.avatar-display-area {
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(3px 4px 0px #0f172a);
 }
 
 .avatar-controls-rows {
@@ -255,7 +261,6 @@ body {
   flex-direction: column;
   gap: 0.5rem;
   flex: 1;
-  max-width: 260px;
 }
 
 .avatar-row {
@@ -455,7 +460,48 @@ body {
   gap: 0.75rem;
 }
 
-/* Modal Overlay & Card for Settings */
+/* Fixed Room Code Header Bar in Lobby */
+.lobby-room-code-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  border: 2.5px solid var(--color-navy);
+  box-shadow: 2px 2px 0px var(--color-navy);
+  font-weight: 900;
+  margin-left: 0.5rem;
+  letter-spacing: 1px;
+}
+
+/* Player Item Row in Lobby */
+.lobby-player-card {
+  background: #ffffff;
+  padding: 0.75rem 1.2rem;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2.5px solid var(--color-navy);
+  box-shadow: 3px 3px 0px var(--color-navy);
+  color: var(--color-navy);
+}
+
+.player-avatar-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--color-navy);
+  overflow: hidden;
+  background: #f1f5f9;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal Settings */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -567,15 +613,10 @@ body {
   border-radius: 50%;
 }
 
-input:checked + .toggle-slider {
-  background-color: var(--color-yellow);
-}
+input:checked + .toggle-slider { background-color: var(--color-yellow); }
+input:checked + .toggle-slider:before { transform: translateX(23px); }
 
-input:checked + .toggle-slider:before {
-  transform: translateX(23px);
-}
-
-/* Arena & Chat Views */
+/* Arena & Chat */
 .game-arena-container {
   display: none;
   flex-direction: column;

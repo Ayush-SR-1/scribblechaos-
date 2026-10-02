@@ -1,7 +1,7 @@
 // Main Application Orchestrator for ScribbleChaos / Pixel Telephone
 class ScribbleApp {
   constructor() {
-    this.currentView = 'profile'; // 'profile', 'gameSelect', 'lobby', 'game', 'reveal'
+    this.currentView = 'profile';
     this.selectedMode = 'pixel_telephone';
 
     this.init();
@@ -256,9 +256,9 @@ class ScribbleApp {
     const currentAvatarSvg = window.avatarEngine ? window.avatarEngine.getSvgString() : '';
 
     listEl.innerHTML = room.players.map(p => `
-      <div style="background:#ffffff; padding:0.8rem 1.2rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:2.5px solid var(--color-navy); box-shadow:3px 3px 0px var(--color-navy); color:var(--color-navy);">
-        <div style="display:flex; align-items:center; gap:0.75rem;">
-          <div style="width:38px; height:38px;">${currentAvatarSvg}</div>
+      <div class="lobby-player-card">
+        <div style="display:flex; align-items:center; gap:0.85rem;">
+          <div class="player-avatar-badge">${currentAvatarSvg}</div>
           <span style="font-weight:800; font-size:1.05rem;">${p.name} ${p.isHost ? '👑 (Host)' : ''}</span>
         </div>
         <span style="color:var(--color-navy); font-size:0.85rem; font-weight:900; background:var(--color-yellow); padding:0.25rem 0.75rem; border-radius:8px; border:2px solid #000;">READY</span>

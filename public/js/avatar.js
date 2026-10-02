@@ -75,7 +75,6 @@ class AvatarEngine {
     const cfg = config || this.getConfig();
     const bgCol = cfg.color;
 
-    // Render Eyes SVG
     let eyesSvg = '';
     switch (cfg.eyes) {
       case 'cute':
@@ -100,7 +99,6 @@ class AvatarEngine {
         eyesSvg = `<rect x="30" y="38" width="10" height="10" fill="#0f172a"/><rect x="60" y="38" width="10" height="10" fill="#0f172a"/>`;
     }
 
-    // Render Mouth SVG
     let mouthSvg = '';
     switch (cfg.mouth) {
       case 'smile':
@@ -126,15 +124,11 @@ class AvatarEngine {
     }
 
     return `
-      <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <!-- Body / Head -->
+      <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;">
         <circle cx="50" cy="50" r="42" fill="${bgCol}" stroke="#0f172a" stroke-width="4.5"/>
-        <!-- Cheek Blushes -->
         <circle cx="22" cy="54" r="6" fill="#ff77aa" opacity="0.4"/>
         <circle cx="78" cy="54" r="6" fill="#ff77aa" opacity="0.4"/>
-        <!-- Eyes -->
         ${eyesSvg}
-        <!-- Mouth -->
         ${mouthSvg}
       </svg>
     `;
@@ -146,10 +140,12 @@ class AvatarEngine {
     
     this.container.innerHTML = `
       <div class="avatar-customizer-box">
-        <button class="btn-dice-random" id="btnRandomAvatar" title="Randomize Avatar">🎲</button>
         
-        <div class="avatar-display-area">
-          ${svgHTML}
+        <div class="avatar-left-section">
+          <div class="avatar-display-area">
+            ${svgHTML}
+          </div>
+          <button class="btn-dice-random" id="btnRandomAvatar" title="Randomize Avatar">🎲</button>
         </div>
 
         <div class="avatar-controls-rows">
@@ -169,6 +165,7 @@ class AvatarEngine {
             <button class="avatar-arrow-btn" onclick="window.avatarEngine.nextColor(1)">&gt;</button>
           </div>
         </div>
+
       </div>
     `;
 
