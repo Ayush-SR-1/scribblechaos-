@@ -1,4 +1,4 @@
-/* ScribbleChaos - Ultra-Modern Neobrutalist Design with Fixed Alignment */
+/* ScribbleChaos - Ultra-Modern Neobrutalist Design with Leaderboard Podium */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700;900&display=swap');
 
 :root {
@@ -172,7 +172,6 @@ body {
   backdrop-filter: blur(16px);
 }
 
-/* Name & Language Row */
 .name-lang-row {
   display: flex;
   gap: 0.75rem;
@@ -207,7 +206,7 @@ body {
   cursor: pointer;
 }
 
-/* Avatar Customizer Box - Fixed Layout */
+/* Avatar Customizer Box */
 .avatar-customizer-box {
   background: #2563eb;
   border: 2.5px solid var(--color-navy);
@@ -361,7 +360,7 @@ body {
   line-height: 1.35;
 }
 
-/* Neobrutalist Action Buttons */
+/* Action Buttons */
 .btn-neo-yellow {
   background: var(--color-yellow);
   color: var(--color-navy);
@@ -400,11 +399,8 @@ body {
   transition: all 0.2s;
   white-space: nowrap;
 }
-.btn-neo-white:hover {
-  background: var(--color-yellow);
-}
+.btn-neo-white:hover { background: var(--color-yellow); }
 
-/* Yellow Bottom Back Button */
 .btn-back-global {
   background: var(--color-yellow);
   color: var(--color-navy);
@@ -427,7 +423,6 @@ body {
   box-shadow: 6px 6px 0px var(--color-navy);
 }
 
-/* Exit / Leave Button */
 .btn-exit-room {
   background: var(--color-red-btn);
   color: #ffffff;
@@ -460,7 +455,6 @@ body {
   gap: 0.75rem;
 }
 
-/* Fixed Room Code Header Bar in Lobby */
 .lobby-room-code-badge {
   display: inline-flex;
   align-items: center;
@@ -475,7 +469,6 @@ body {
   letter-spacing: 1px;
 }
 
-/* Player Item Row in Lobby */
 .lobby-player-card {
   background: #ffffff;
   padding: 0.75rem 1.2rem;
@@ -501,15 +494,71 @@ body {
   justify-content: center;
 }
 
-/* Modal Settings */
+/* Animated Leaderboard Victory Podium Modal */
+.podium-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.podium-step {
+  background: #ffffff;
+  border: 3px solid var(--color-navy);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-neo);
+  color: var(--color-navy);
+  width: 110px;
+}
+
+.podium-step.first {
+  height: 180px;
+  background: var(--color-yellow);
+  border-color: var(--color-navy);
+}
+
+.podium-step.second {
+  height: 140px;
+  background: #e2e8f0;
+}
+
+.podium-step.third {
+  height: 110px;
+  background: #fed7aa;
+}
+
+.podium-medal {
+  font-size: 2.2rem;
+}
+
+.podium-name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.podium-score {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-navy);
+}
+
+/* Modals */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(10, 13, 23, 0.8);
-  backdrop-filter: blur(8px);
+  background: rgba(10, 13, 23, 0.85);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -530,7 +579,7 @@ body {
   border-radius: var(--border-radius-card);
   box-shadow: var(--shadow-neo), 0 20px 40px rgba(0,0,0,0.5);
   width: 90%;
-  max-width: 440px;
+  max-width: 480px;
   padding: 1.75rem;
   color: var(--color-navy);
   display: flex;
@@ -585,11 +634,7 @@ body {
   height: 26px;
 }
 
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
 
 .toggle-slider {
   position: absolute;

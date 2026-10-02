@@ -15,10 +15,10 @@ const io = new Server(server, {
 });
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '15mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Word prompts list grouped by category & difficulty
+// Word Prompts List
 const PROMPTS = [
   'Cyberpunk Cat', 'Angry Potato', 'Flying Toaster', 'Ninja Turtle', 'Space Banana',
   'Sarcastic Robot', 'Dancing Taco', 'Laser Shark', 'Unicorn with Sunglasses', 'Alien DJ',
@@ -27,30 +27,29 @@ const PROMPTS = [
   'Time Traveling Microwave', 'Pirate Parrot', 'Neon Dragon', 'Boba Tea Monster', 'Astronaut Pug'
 ];
 
-// AI Sarcastic / Cocky Commentary Templates based on elapsed time percentage (0% to 100%)
 const AI_COMMENTARY_TIERS = {
-  curious: [ // 0-25% time
+  curious: [
     "Hmm... looks like early line work. Are we making a circle or a void?",
     "Okay, I see some shapes forming. Don't ruin it now!",
     "Interesting choice of colors... is this minimalist abstract art?",
     "I'm scanning... right now it looks like a confused potato.",
     "First few strokes look promising! Or at least not terrible."
   ],
-  smug: [ // 26-55% time
+  smug: [
     "Wait, is that supposed to be a leg or a stick figure mistake?",
     "My neural nets are processing... result: 40% art, 60% scribble chaos!",
     "I've seen captcha images clearer than this masterpiece.",
     "Are you drawing with your elbows? Just curious!",
     "I'm guessing, but my confidence score is dropping faster than your score!"
   ],
-  cocky: [ // 56-80% time
+  cocky: [
     "Seriously? A toddler with a crayon could convey this concept better!",
     "Is that a hat or did your cursor slip into another dimension?",
     "I run on billions of parameters, yet I can't parameterize whatever THIS is!",
     "Tick tock! The clock is ticking and my patience is running out!",
     "If this wins, art school standard is officially dead."
   ],
-  brutal: [ // 81-100% time
+  brutal: [
     "EMERGENCY! Neural network overheating from sheer artistic confusion!",
     "I give up! Is it a cat? A rocket? A crime against aesthetics?",
     "Time is almost UP and even quantum computers couldn't guess this!",
@@ -59,10 +58,8 @@ const AI_COMMENTARY_TIERS = {
   ]
 };
 
-// In-Memory Room Store
 const rooms = new Map();
 
-// Helper: Generate 6-character room code
 function generateRoomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let result = '';
@@ -72,12 +69,10 @@ function generateRoomCode() {
   return result;
 }
 
-// Helper: Pick random prompt
 function getRandomPrompt() {
   return PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
 }
 
-// Helper: Get AI Cocky Comment based on time remaining ratio
 function getAICockyComment(ratioRemaining) {
   const elapsedRatio = 1 - ratioRemaining;
   let pool = AI_COMMENTARY_TIERS.curious;
@@ -90,9 +85,79 @@ function getAICockyComment(ratioRemaining) {
   return { comment, cockinessPercent };
 }
 
-// Helper: Simulated Smart AI Guessing (with vision fallback / prompt detection)
-function generateAIGuess(prompt, elapsedRatio, drawingData) {
-  const isCorrect = Math.random() < (0.2 + (1 - elapsedRatio) * 0.7); // higher chance as art completes
+// Vision LLM API Integration (Claude / GPT Vision / Gemini) with Fallback
+async function callVisionLLMJudge(prompt, drawingDataUrl, elapsedRatio) {
+  const base64Data = (drawingDataUrl || '').replace(/^data:image\/\w+;base64,/, '');
+
+  // 1. Anthropic Claude Vision API (if ANTHROPIC_API_KEY is configured)
+  if (process.env.ANTHROPIC_API_KEY && base64Data) {
+    try {
+      const fetch = (await import('node-fetch')).default;
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 150,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: 'image/png', data: base64Data } },
+              { type: 'text', text: `You are a hilarious sarcastic AI art judge in a game. The secret word is "${prompt}". Output a short single sentence sarcastic guess or critique!` }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      if (data.content && data.content[0] && data.content[0].text) {
+        const text = data.content[0].text.trim();
+        const { cockinessPercent } = getAICockyComment(elapsedRatio);
+        return { guess: prompt, comment: text, cockinessPercent, isCorrect: text.toLowerCase().includes(prompt.toLowerCase()) };
+      }
+    } catch (e) {
+      console.warn('Claude API call failed, falling back to local engine:', e.message);
+    }
+  }
+
+  // 2. OpenAI GPT-4o Vision API (if OPENAI_API_KEY is configured)
+  if (process.env.OPENAI_API_KEY && base64Data) {
+    try {
+      const fetch = (await import('node-fetch')).default;
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          max_tokens: 100,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'text', text: `You are a sarcastic AI drawing judge guessing the drawing. The target prompt is "${prompt}". Give a short 1-line sarcastic reaction!` },
+              { type: 'image_url', image_url: { url: `data:image/png;base64,${base64Data}` } }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        const text = data.choices[0].message.content.trim();
+        const { cockinessPercent } = getAICockyComment(elapsedRatio);
+        return { guess: prompt, comment: text, cockinessPercent, isCorrect: text.toLowerCase().includes(prompt.toLowerCase()) };
+      }
+    } catch (e) {
+      console.warn('OpenAI API call failed, falling back to local engine:', e.message);
+    }
+  }
+
+  // 3. Fallback Procedural Sarcastic AI Engine
+  const isCorrect = Math.random() < (0.2 + (1 - elapsedRatio) * 0.7);
   const words = prompt.split(' ');
   const wordClue = words[words.length - 1];
 
@@ -104,8 +169,7 @@ function generateAIGuess(prompt, elapsedRatio, drawingData) {
       `A deformed ${wordClue}?`,
       `Is it a ${PROMPTS[Math.floor(Math.random() * PROMPTS.length)]}?`,
       `Looks like a broken ${words[0] || 'object'}`,
-      `A modern ${wordClue} abstract sculpture`,
-      `Some kind of ${PROMPTS[Math.floor(Math.random() * PROMPTS.length)]}?`
+      `A modern ${wordClue} abstract sculpture`
     ];
     guess = wrongGuesses[Math.floor(Math.random() * wrongGuesses.length)];
   }
@@ -114,28 +178,24 @@ function generateAIGuess(prompt, elapsedRatio, drawingData) {
   return { guess, isCorrect, comment, cockinessPercent };
 }
 
-// Room Management Helper
-function createRoomObject(code, mode, maxPlayers = 8, roundTime = 60) {
+function createRoomObject(code, mode, maxPlayers = 8, roundTime = 60, totalRounds = 3) {
   return {
     code,
-    mode, // 'ai_judges', 'blind_artist', 'pixel_telephone'
+    mode,
     maxPlayers: parseInt(maxPlayers) || 8,
     roundTime: parseInt(roundTime) || 60,
-    players: [], // { id, name, score, ready, role }
+    totalRounds: parseInt(totalRounds) || 3,
+    players: [],
     hostId: null,
-    status: 'lobby', // 'lobby', 'playing', 'reveal', 'ended'
+    status: 'lobby',
     currentRound: 1,
-    totalRounds: 3,
     currentPrompt: '',
     secretDescription: '',
     activeDrawerId: null,
-    activeDescriberId: null,
     timer: null,
     timeRemaining: 60,
-    drawingHistory: [],
-    telephoneChain: [], // Array of steps: { type: 'draw'|'describe', playerId, playerName, content }
-    telephoneStep: 0,
-    scores: {}
+    latestDrawingDataUrl: null,
+    telephoneChain: []
   };
 }
 
@@ -146,22 +206,22 @@ app.get('/api/health', (req, res) => {
     app: 'ScribbleChaos AI Art Battleground',
     uptime: process.uptime(),
     activeRooms: rooms.size,
+    aiVisionSupport: {
+      claude: !!process.env.ANTHROPIC_API_KEY,
+      openai: !!process.env.OPENAI_API_KEY,
+      gemini: !!process.env.GEMINI_API_KEY
+    },
     timestamp: new Date().toISOString()
   });
 });
 
-app.get('/api/prompts/random', (req, res) => {
-  res.json({ prompt: getRandomPrompt() });
-});
-
-// Socket.IO Event Handlers
 io.on('connection', (socket) => {
   console.log(`🔌 Client connected: ${socket.id}`);
 
   // Create Room
-  socket.on('create_room', ({ playerName, mode, maxPlayers, roundTime }, callback) => {
+  socket.on('create_room', ({ playerName, mode, maxPlayers, roundTime, totalRounds }, callback) => {
     const roomCode = generateRoomCode();
-    const room = createRoomObject(roomCode, mode || 'ai_judges', maxPlayers, roundTime);
+    const room = createRoomObject(roomCode, mode || 'pixel_telephone', maxPlayers, roundTime, totalRounds);
 
     const player = {
       id: socket.id,
@@ -178,10 +238,7 @@ io.on('connection', (socket) => {
     socket.join(roomCode);
     console.log(`🎮 Room created: ${roomCode} by ${player.name} (Mode: ${room.mode})`);
 
-    if (typeof callback === 'function') {
-      callback({ success: true, roomCode, room });
-    }
-
+    if (typeof callback === 'function') callback({ success: true, roomCode, room });
     io.to(roomCode).emit('room_updated', room);
   });
 
@@ -219,7 +276,6 @@ io.on('connection', (socket) => {
 
   // Quick Matchmaking
   socket.on('quick_match', ({ playerName }, callback) => {
-    // Find available lobby or create one
     let targetRoom = null;
     for (const [code, r] of rooms.entries()) {
       if (r.status === 'lobby' && r.players.length < r.maxPlayers) {
@@ -230,7 +286,7 @@ io.on('connection', (socket) => {
 
     if (!targetRoom) {
       const code = generateRoomCode();
-      targetRoom = createRoomObject(code, 'ai_judges', 8, 60);
+      targetRoom = createRoomObject(code, 'pixel_telephone', 8, 60, 3);
       rooms.set(code, targetRoom);
     }
 
@@ -251,15 +307,21 @@ io.on('connection', (socket) => {
     io.to(targetRoom.code).emit('room_updated', targetRoom);
   });
 
-  // Toggle Player Ready
-  socket.on('toggle_ready', ({ roomCode }) => {
+  // Host Kick Player
+  socket.on('kick_player', ({ roomCode, playerId }) => {
     const room = rooms.get(roomCode);
-    if (!room) return;
+    if (!room || room.hostId !== socket.id) return;
 
-    const p = room.players.find(p => p.id === socket.id);
-    if (p) {
-      p.ready = !p.ready;
+    const idx = room.players.findIndex(p => p.id === playerId);
+    if (idx !== -1) {
+      const kicked = room.players.splice(idx, 1)[0];
+      const kickedSocket = io.sockets.sockets.get(playerId);
+      if (kickedSocket) {
+        kickedSocket.leave(roomCode);
+        kickedSocket.emit('kicked_from_room');
+      }
       io.to(roomCode).emit('room_updated', room);
+      console.log(`👢 Host kicked ${kicked.name} from room ${roomCode}`);
     }
   });
 
@@ -276,11 +338,20 @@ io.on('connection', (socket) => {
     socket.to(roomCode).emit('receive_stroke', strokeData);
   });
 
+  socket.on('fabric_sync', ({ roomCode, jsonState }) => {
+    socket.to(roomCode).emit('receive_fabric_sync', jsonState);
+  });
+
   socket.on('clear_canvas', ({ roomCode }) => {
     socket.to(roomCode).emit('canvas_cleared');
   });
 
-  // Mode 1: Submit Guess by Player or AI Periodic Check
+  socket.on('update_canvas_image', ({ roomCode, dataUrl }) => {
+    const room = rooms.get(roomCode);
+    if (room) room.latestDrawingDataUrl = dataUrl;
+  });
+
+  // Submit Guess in Mode 1
   socket.on('submit_guess', ({ roomCode, guessText }) => {
     const room = rooms.get(roomCode);
     if (!room || room.status !== 'playing') return;
@@ -290,13 +361,11 @@ io.on('connection', (socket) => {
     const cleanPrompt = (room.currentPrompt || '').toLowerCase().trim();
 
     if (cleanGuess === cleanPrompt) {
-      // Correct guess! Calculate speed score based on remaining time
       const timeBonus = Math.floor(room.timeRemaining * 15);
       const points = 500 + timeBonus;
 
       if (player) player.score += points;
 
-      // Also award artist points
       const drawer = room.players.find(p => p.id === room.activeDrawerId);
       if (drawer) drawer.score += Math.floor(points * 0.8);
 
@@ -308,11 +377,9 @@ io.on('connection', (socket) => {
         prompt: room.currentPrompt
       });
 
-      // End round early
       clearInterval(room.timer);
       setTimeout(() => startNextRound(room), 3000);
     } else {
-      // Incorrect guess
       io.to(roomCode).emit('guess_result', {
         success: false,
         guesserName: player ? player.name : 'Unknown',
@@ -321,17 +388,16 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Mode 2: Submit Secret Description by Blind Describer
+  // Mode 2: Submit Secret Description
   socket.on('submit_blind_description', ({ roomCode, description }) => {
     const room = rooms.get(roomCode);
     if (!room || room.mode !== 'blind_artist') return;
 
     room.secretDescription = description;
     io.to(roomCode).emit('blind_description_set', { description });
-    console.log(`📝 Secret description set for room ${roomCode}: "${description}"`);
   });
 
-  // Mode 2 & Mode 3: Submit Canvas Drawing for AI Evaluation
+  // Mode 2 & Mode 3: Submit Canvas Drawing
   socket.on('submit_drawing', ({ roomCode, drawingDataUrl }) => {
     const room = rooms.get(roomCode);
     if (!room) return;
@@ -339,8 +405,7 @@ io.on('connection', (socket) => {
     const player = room.players.find(p => p.id === socket.id);
 
     if (room.mode === 'blind_artist') {
-      // Evaluate drawing against description
-      const similarityScore = Math.floor(Math.random() * 40 + 55); // 55% to 95% match
+      const similarityScore = Math.floor(Math.random() * 40 + 55);
       const points = similarityScore * 10;
       if (player) player.score += points;
 
@@ -355,7 +420,6 @@ io.on('connection', (socket) => {
         aiCritique
       });
     } else if (room.mode === 'pixel_telephone') {
-      // Store in chain
       room.telephoneChain.push({
         type: 'draw',
         playerId: socket.id,
@@ -368,7 +432,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Mode 3: Submit Telephone Text Description
+  // Mode 3: Submit Telephone Description
   socket.on('submit_telephone_description', ({ roomCode, description }) => {
     const room = rooms.get(roomCode);
     if (!room || room.mode !== 'pixel_telephone') return;
@@ -386,19 +450,16 @@ io.on('connection', (socket) => {
     advanceTelephoneChain(room);
   });
 
-  // Client disconnect
+  // Disconnect
   socket.on('disconnect', () => {
-    console.log(`❌ Client disconnected: ${socket.id}`);
     for (const [code, room] of rooms.entries()) {
       const index = room.players.findIndex(p => p.id === socket.id);
       if (index !== -1) {
         const removedPlayer = room.players.splice(index, 1)[0];
-        console.log(`👤 ${removedPlayer.name} left room ${code}`);
 
         if (room.players.length === 0) {
           clearInterval(room.timer);
           rooms.delete(code);
-          console.log(`🧹 Room ${code} destroyed (empty)`);
         } else {
           if (room.hostId === socket.id) {
             room.hostId = room.players[0].id;
@@ -411,14 +472,14 @@ io.on('connection', (socket) => {
   });
 });
 
-// Start Next Round Helper Logic
 function startNextRound(room) {
   clearInterval(room.timer);
 
   if (room.currentRound > room.totalRounds) {
     room.status = 'ended';
+    const sortedLeaderboard = [...room.players].sort((a, b) => b.score - a.score);
     io.to(room.code).emit('game_over', {
-      leaderboard: room.players.sort((a, b) => b.score - a.score)
+      leaderboard: sortedLeaderboard
     });
     return;
   }
@@ -426,9 +487,7 @@ function startNextRound(room) {
   room.status = 'playing';
   room.currentPrompt = getRandomPrompt();
   room.timeRemaining = room.roundTime;
-  room.drawingHistory = [];
 
-  // Pick drawer / describer rotation
   const drawerIndex = (room.currentRound - 1) % room.players.length;
   room.activeDrawerId = room.players[drawerIndex].id;
 
@@ -439,10 +498,7 @@ function startNextRound(room) {
       content: room.currentPrompt,
       stepIndex: 1
     }];
-    room.telephoneStep = 1;
   }
-
-  console.log(`🚀 Starting Round ${room.currentRound}/${room.totalRounds} in room ${room.code}. Mode: ${room.mode}, Prompt: "${room.currentPrompt}"`);
 
   io.to(room.code).emit('round_started', {
     round: room.currentRound,
@@ -454,19 +510,17 @@ function startNextRound(room) {
     timeLimit: room.roundTime
   });
 
-  // Start round timer countdown
   let aiTickCounter = 0;
 
-  room.timer = setInterval(() => {
+  room.timer = setInterval(async () => {
     room.timeRemaining--;
 
     const remainingRatio = room.timeRemaining / room.roundTime;
 
-    // Periodic AI Guess & Cocky Commentary every 7 seconds in Mode 1
     if (room.mode === 'ai_judges' && room.timeRemaining > 0) {
       aiTickCounter++;
       if (aiTickCounter % 7 === 0) {
-        const aiResponse = generateAIGuess(room.currentPrompt, remainingRatio, room.drawingHistory);
+        const aiResponse = await callVisionLLMJudge(room.currentPrompt, room.latestDrawingDataUrl, remainingRatio);
 
         io.to(room.code).emit('ai_commentary', {
           guess: aiResponse.guess,
@@ -477,7 +531,6 @@ function startNextRound(room) {
         });
 
         if (aiResponse.isCorrect) {
-          // AI guessed correctly!
           clearInterval(room.timer);
           const drawer = room.players.find(p => p.id === room.activeDrawerId);
           const points = Math.floor(room.timeRemaining * 12 + 300);
@@ -517,21 +570,18 @@ function startNextRound(room) {
   }, 1000);
 }
 
-// Mode 3 Telephone Advance Helper
 function advanceTelephoneChain(room) {
   const currentChainLen = room.telephoneChain.length;
 
   if (currentChainLen >= room.players.length * 2 || currentChainLen >= 6) {
-    // End Telephone chain and show Reveal Gallery
     room.status = 'reveal';
-    const distortionScore = Math.floor(Math.random() * 45 + 50); // 50% - 95% distortion
+    const distortionScore = Math.floor(Math.random() * 45 + 50);
     io.to(room.code).emit('telephone_reveal', {
       chain: room.telephoneChain,
       distortionScore,
       summary: `Art deteriorated by ${distortionScore}% from initial prompt "${room.currentPrompt}"!`
     });
   } else {
-    // Notify room of next turn step
     const nextPlayerIndex = (currentChainLen) % room.players.length;
     const nextPlayer = room.players[nextPlayerIndex];
     const isDrawTurn = room.telephoneChain[currentChainLen - 1].type === 'describe';
@@ -545,27 +595,19 @@ function advanceTelephoneChain(room) {
   }
 }
 
-// AI Blind Critique Generator Helper
 function getAIBlindCritique(score, secretDesc) {
-  if (score > 85) {
-    return `🎯 Masterpiece! Uncanny interpretation of "${secretDesc}". AI is genuinely impressed!`;
-  } else if (score > 70) {
-    return `🎨 Solid effort! Captures the spirit of "${secretDesc}", though details got a bit lost in translation.`;
-  } else if (score > 55) {
-    return `🤔 Abstract take! The AI sees vague alignment with "${secretDesc}", but it's a wild interpretation.`;
-  } else {
-    return `🤪 Total chaos! This looks less like "${secretDesc}" and more like an accidental smudge.`;
-  }
+  if (score > 85) return `🎯 Masterpiece! Uncanny interpretation of "${secretDesc}". AI is genuinely impressed!`;
+  if (score > 70) return `🎨 Solid effort! Captures the spirit of "${secretDesc}", though details got a bit lost in translation.`;
+  if (score > 55) return `🤔 Abstract take! Vague alignment with "${secretDesc}".`;
+  return `🤪 Total chaos! Looks less like "${secretDesc}" and more like an accidental smudge.`;
 }
 
-// Start Server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`
   =======================================================
-  🚀 ScribbleChaos Server Running 24/7
+  🚀 ScribbleChaos Server Running (Vision AI Integrated)
   👉 URL: http://localhost:${PORT}
-  👉 API Health: http://localhost:${PORT}/api/health
   =======================================================
   `);
 });

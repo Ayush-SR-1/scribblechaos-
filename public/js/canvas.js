@@ -1,191 +1,227 @@
-// Interactive HTML5 Drawing Canvas Engine for ScribbleChaos
+// Enhanced HTML5 Canvas Engine with Fabric.js Integration
 class ScribbleCanvas {
   constructor(canvasElement) {
-    this.canvas = canvasElement;
-    this.ctx = this.canvas.getContext('2d');
-    this.isDrawing = false;
+    this.canvasEl = canvasElement;
+    this.canvas = null;
     this.color = '#000000';
     this.size = 6;
     this.isEraser = false;
-    this.isNeonGlow = false;
     this.undoStack = [];
     this.redoStack = [];
     this.onStrokeCallback = null;
 
-    this.resizeCanvas();
-    this.bindEvents();
-    this.saveState();
+    this.initFabric();
   }
 
-  resizeCanvas() {
-    const parent = this.canvas.parentElement;
-    const rect = parent.getBoundingClientRect();
-    
-    // Maintain internal high resolution
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = this.canvas.width;
-    tempCanvas.height = this.canvas.height;
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.drawImage(this.canvas, 0, 0);
+  initFabric() {
+    if (typeof fabric !== 'undefined') {
+      const parent = this.canvasEl.parentElement;
+      const rect = parent.getBoundingClientRect();
+      const w = rect.width || 600;
+      const h = rect.height || 450;
 
-    this.canvas.width = rect.width || 600;
-    this.canvas.height = rect.height || 450;
-
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    if (tempCanvas.width > 0) {
-      this.ctx.drawImage(tempCanvas, 0, 0, this.canvas.width, this.canvas.height);
-    }
-  }
-
-  bindEvents() {
-    window.addEventListener('resize', () => this.resizeCanvas());
-
-    // Mouse Events
-    this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
-    this.canvas.addEventListener('mousemove', (e) => this.draw(e));
-    this.canvas.addEventListener('mouseup', () => this.stopDrawing());
-    this.canvas.addEventListener('mouseleave', () => this.stopDrawing());
-
-    // Touch Events
-    this.canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      this.startDrawing(touch);
-    });
-    this.canvas.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      this.draw(touch);
-    });
-    this.canvas.addEventListener('touchend', () => this.stopDrawing());
-  }
-
-  getPos(e) {
-    const rect = this.canvas.getBoundingClientRect();
-    const scaleX = this.canvas.width / rect.width;
-    const scaleY = this.canvas.height / rect.height;
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY
-    };
-  }
-
-  startDrawing(e) {
-    this.isDrawing = true;
-    const pos = this.getPos(e);
-    this.lastPos = pos;
-
-    this.ctx.beginPath();
-    this.ctx.moveTo(pos.x, pos.y);
-
-    if (window.soundEngine) window.soundEngine.playDrawStroke();
-  }
-
-  draw(e) {
-    if (!this.isDrawing) return;
-    const currentPos = this.getPos(e);
-
-    this.ctx.lineWidth = this.size;
-    this.ctx.lineCap = 'round';
-    this.ctx.lineJoin = 'round';
-
-    if (this.isEraser) {
-      this.ctx.strokeStyle = '#ffffff';
-      this.ctx.shadowBlur = 0;
-    } else {
-      this.ctx.strokeStyle = this.color;
-      if (this.isNeonGlow) {
-        this.ctx.shadowColor = this.color;
-        this.ctx.shadowBlur = 12;
-      } else {
-        this.ctx.shadowBlur = 0;
-      }
-    }
-
-    this.ctx.beginPath();
-    this.ctx.moveTo(this.lastPos.x, this.lastPos.y);
-    this.ctx.lineTo(currentPos.x, currentPos.y);
-    this.ctx.stroke();
-
-    if (this.onStrokeCallback) {
-      this.onStrokeCallback({
-        x0: this.lastPos.x / this.canvas.width,
-        y0: this.lastPos.y / this.canvas.height,
-        x1: currentPos.x / this.canvas.width,
-        y1: currentPos.y / this.canvas.height,
-        color: this.isEraser ? '#ffffff' : this.color,
-        size: this.size,
-        isNeonGlow: this.isNeonGlow
+      this.canvas = new fabric.Canvas(this.canvasEl.id, {
+        isDrawingMode: true,
+        width: w,
+        height: h,
+        backgroundColor: '#ffffff'
       });
-    }
 
-    this.lastPos = currentPos;
+      this.canvas.freeDrawingBrush.color = this.color;
+      this.canvas.freeDrawingBrush.width = this.size;
+
+      this.canvas.on('path:created', (e) => {
+        this.saveState();
+        if (this.onStrokeCallback && window.socketClient && window.socketClient.currentRoom) {
+          const jsonState = JSON.stringify(e.path.toObject());
+          window.socketClient.socket.emit('draw_stroke', {
+            roomCode: window.socketClient.currentRoom.code,
+            strokeData: { jsonPath: jsonState, color: this.color, size: this.size }
+          });
+        }
+        this.broadcastImageDataUrl();
+      });
+
+      this.saveState();
+    } else {
+      // Native 2D Canvas Fallback
+      this.ctx = this.canvasEl.getContext('2d');
+      this.resizeNative();
+      this.bindNativeEvents();
+    }
+  }
+
+  resizeNative() {
+    const parent = this.canvasEl.parentElement;
+    const rect = parent.getBoundingClientRect();
+    this.canvasEl.width = rect.width || 600;
+    this.canvasEl.height = rect.height || 450;
+    if (this.ctx) {
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+    }
+  }
+
+  bindNativeEvents() {
+    let drawing = false;
+    let lastPos = { x: 0, y: 0 };
+
+    const getPos = (e) => {
+      const r = this.canvasEl.getBoundingClientRect();
+      return {
+        x: (e.clientX - r.left) * (this.canvasEl.width / r.width),
+        y: (e.clientY - r.top) * (this.canvasEl.height / r.height)
+      };
+    };
+
+    this.canvasEl.addEventListener('mousedown', (e) => {
+      drawing = true;
+      lastPos = getPos(e);
+      if (window.soundEngine) window.soundEngine.playDrawStroke();
+    });
+
+    this.canvasEl.addEventListener('mousemove', (e) => {
+      if (!drawing || !this.ctx) return;
+      const current = getPos(e);
+      this.ctx.lineWidth = this.size;
+      this.ctx.lineCap = 'round';
+      this.ctx.lineJoin = 'round';
+      this.ctx.strokeStyle = this.isEraser ? '#ffffff' : this.color;
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(lastPos.x, lastPos.y);
+      this.ctx.lineTo(current.x, current.y);
+      this.ctx.stroke();
+
+      if (this.onStrokeCallback) {
+        this.onStrokeCallback({
+          x0: lastPos.x / this.canvasEl.width,
+          y0: lastPos.y / this.canvasEl.height,
+          x1: current.x / this.canvasEl.width,
+          y1: current.y / this.canvasEl.height,
+          color: this.isEraser ? '#ffffff' : this.color,
+          size: this.size
+        });
+      }
+
+      lastPos = current;
+    });
+
+    const stop = () => {
+      if (drawing) {
+        drawing = false;
+        this.saveState();
+        this.broadcastImageDataUrl();
+      }
+    };
+
+    this.canvasEl.addEventListener('mouseup', stop);
+    this.canvasEl.addEventListener('mouseleave', stop);
   }
 
   drawRemoteStroke(stroke) {
-    const x0 = stroke.x0 * this.canvas.width;
-    const y0 = stroke.y0 * this.canvas.height;
-    const x1 = stroke.x1 * this.canvas.width;
-    const y1 = stroke.y1 * this.canvas.height;
+    if (this.canvas && stroke.jsonPath) {
+      fabric.util.enlivenObjects([JSON.parse(stroke.jsonPath)], (objects) => {
+        objects.forEach((obj) => {
+          this.canvas.add(obj);
+        });
+        this.canvas.renderAll();
+      });
+    } else if (this.ctx) {
+      const x0 = stroke.x0 * this.canvasEl.width;
+      const y0 = stroke.y0 * this.canvasEl.height;
+      const x1 = stroke.x1 * this.canvasEl.width;
+      const y1 = stroke.y1 * this.canvasEl.height;
 
-    this.ctx.lineWidth = stroke.size;
-    this.ctx.lineCap = 'round';
-    this.ctx.lineJoin = 'round';
-    this.ctx.strokeStyle = stroke.color;
+      this.ctx.lineWidth = stroke.size;
+      this.ctx.lineCap = 'round';
+      this.ctx.lineJoin = 'round';
+      this.ctx.strokeStyle = stroke.color;
 
-    if (stroke.isNeonGlow) {
-      this.ctx.shadowColor = stroke.color;
-      this.ctx.shadowBlur = 12;
-    } else {
-      this.ctx.shadowBlur = 0;
+      this.ctx.beginPath();
+      this.ctx.moveTo(x0, y0);
+      this.ctx.lineTo(x1, y1);
+      this.ctx.stroke();
     }
-
-    this.ctx.beginPath();
-    this.ctx.moveTo(x0, y0);
-    this.ctx.lineTo(x1, y1);
-    this.ctx.stroke();
   }
 
-  stopDrawing() {
-    if (this.isDrawing) {
-      this.isDrawing = false;
-      this.saveState();
+  setColor(col) {
+    this.color = col;
+    this.isEraser = false;
+    if (this.canvas) {
+      this.canvas.freeDrawingBrush.color = this.color;
     }
+  }
+
+  setEraser() {
+    this.isEraser = true;
+    if (this.canvas) {
+      this.canvas.freeDrawingBrush.color = '#ffffff';
+    }
+  }
+
+  setSize(sz) {
+    this.size = sz;
+    if (this.canvas) {
+      this.canvas.freeDrawingBrush.width = this.size;
+    }
+  }
+
+  clear() {
+    if (this.canvas) {
+      this.canvas.clear();
+      this.canvas.setBackgroundColor('#ffffff', this.canvas.renderAll.bind(this.canvas));
+    } else if (this.ctx) {
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+    }
+    this.saveState();
+    this.broadcastImageDataUrl();
   }
 
   saveState() {
-    if (this.undoStack.length >= 20) this.undoStack.shift();
-    this.undoStack.push(this.canvas.toDataURL());
-    this.redoStack = [];
+    if (this.canvas) {
+      if (this.undoStack.length >= 20) this.undoStack.shift();
+      this.undoStack.push(JSON.stringify(this.canvas.toDatalessJSON()));
+    } else {
+      if (this.undoStack.length >= 20) this.undoStack.shift();
+      this.undoStack.push(this.canvasEl.toDataURL());
+    }
   }
 
   undo() {
     if (this.undoStack.length > 1) {
       this.redoStack.push(this.undoStack.pop());
-      const previousState = this.undoStack[this.undoStack.length - 1];
-      this.loadImage(previousState);
+      const state = this.undoStack[this.undoStack.length - 1];
+      if (this.canvas) {
+        this.canvas.loadFromJSON(state, this.canvas.renderAll.bind(this.canvas));
+      } else if (this.ctx) {
+        const img = new Image();
+        img.onload = () => {
+          this.ctx.clearRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+          this.ctx.drawImage(img, 0, 0);
+        };
+        img.src = state;
+      }
+      this.broadcastImageDataUrl();
     }
   }
 
-  clear() {
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.saveState();
-  }
-
-  loadImage(dataUrl) {
-    const img = new Image();
-    img.onload = () => {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.drawImage(img, 0, 0);
-    };
-    img.src = dataUrl;
+  broadcastImageDataUrl() {
+    const dataUrl = this.getDataUrl();
+    if (window.socketClient && window.socketClient.currentRoom) {
+      window.socketClient.socket.emit('update_canvas_image', {
+        roomCode: window.socketClient.currentRoom.code,
+        dataUrl
+      });
+    }
   }
 
   getDataUrl() {
-    return this.canvas.toDataURL('image/png');
+    if (this.canvas) {
+      return this.canvas.toDataURL({ format: 'png' });
+    }
+    return this.canvasEl.toDataURL('image/png');
   }
 }
 

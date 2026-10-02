@@ -6,6 +6,8 @@
   <title>Pixel Telephone | AI Drawing & Battleground</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Fabric.js Vector Canvas Engine CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 </head>
 <body>
 
@@ -70,7 +72,7 @@
 
     </div>
 
-    <!-- STAGE 2: GAME MODE SELECTION VIEW (Matches Uploaded Screenshot) -->
+    <!-- STAGE 2: GAME MODE SELECTION VIEW -->
     <div id="gameSelectView" style="display: none; width: 100%; flex-direction: column; align-items: center; gap: 1.5rem;">
       
       <!-- Title Block with Yellow Highlight Box behind "Pixel" -->
@@ -88,7 +90,7 @@
         <!-- 3 Mode Selection Radio Cards -->
         <div class="mode-selection-list">
           
-          <!-- Mode 1: Pixel Telephone (Selected State) -->
+          <!-- Mode 1: Pixel Telephone -->
           <div class="mode-radio-card selected" data-mode="pixel_telephone">
             <input type="radio" name="gameMode" value="pixel_telephone" class="mode-radio-input" id="radioTelephone" checked>
             <div class="mode-info-block">
@@ -135,7 +137,7 @@
 
       </div>
 
-      <!-- Yellow Back Button (Returns to Profile Setup Page) -->
+      <!-- Yellow Back Button -->
       <button class="btn-back-global" id="btnBackToProfile">
         <i class="fa-solid fa-arrow-left"></i> Back
       </button>
@@ -273,6 +275,24 @@
 
   </main>
 
+  <!-- LEADERBOARD VICTORY PODIUM MODAL -->
+  <div class="modal-overlay" id="leaderboardModal">
+    <div class="modal-card" style="max-width: 520px; text-align: center;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-trophy" style="color: var(--color-yellow);"></i> Battleground Leaderboard</h3>
+        <button class="btn-close-modal" id="btnCloseLeaderboard">&times;</button>
+      </div>
+
+      <div class="podium-container" id="podiumContainer">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <button class="btn-neo-yellow" onclick="app.goBackToHome()">
+        Return to Battleground
+      </button>
+    </div>
+  </div>
+
   <!-- SETTINGS MODAL -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-card">
@@ -282,7 +302,6 @@
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <!-- SFX Toggle -->
         <div class="setting-row">
           <span class="setting-label">Sound Effects</span>
           <label class="toggle-switch">
@@ -291,7 +310,6 @@
           </label>
         </div>
 
-        <!-- Music Toggle -->
         <div class="setting-row">
           <span class="setting-label">Arcade Background Music</span>
           <label class="toggle-switch">
@@ -309,7 +327,7 @@
 
   <!-- Footer -->
   <footer class="footer-bar">
-    <p>ScribbleChaos &copy; 2026. Powered by Node.js, Socket.IO & 3D Animated Paint Canvas Engine.</p>
+    <p>ScribbleChaos &copy; 2026. Powered by Node.js, Socket.IO, Fabric.js & 3D Animated Paint Canvas Engine.</p>
   </footer>
 
   <!-- Scripts -->

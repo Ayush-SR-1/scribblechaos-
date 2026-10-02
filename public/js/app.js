@@ -32,7 +32,7 @@ class ScribbleApp {
       });
     }
 
-    // Mode Radio Selection Cards (Stage 2)
+    // Mode Radio Selection Cards
     const radioCards = document.querySelectorAll('.mode-radio-card');
     radioCards.forEach(card => {
       card.addEventListener('click', () => {
@@ -69,7 +69,7 @@ class ScribbleApp {
       });
     }
 
-    // Settings Modal Open / Close
+    // Settings Modal
     const btnOpenSettings = document.getElementById('btnOpenSettings');
     const btnCloseSettings = document.getElementById('btnCloseSettings');
     const btnSaveSettings = document.getElementById('btnSaveSettings');
@@ -102,7 +102,17 @@ class ScribbleApp {
       });
     }
 
-    // Exit Room & Exit Game Buttons
+    // Leaderboard Modal Close Button
+    const btnCloseLeaderboard = document.getElementById('btnCloseLeaderboard');
+    const modalLeaderboard = document.getElementById('leaderboardModal');
+    if (btnCloseLeaderboard && modalLeaderboard) {
+      btnCloseLeaderboard.addEventListener('click', () => {
+        modalLeaderboard.classList.remove('active');
+        this.showProfileView();
+      });
+    }
+
+    // Exit Buttons
     const btnExitLobby = document.getElementById('btnExitLobby');
     const btnExitGame = document.getElementById('btnExitGame');
 
@@ -119,6 +129,53 @@ class ScribbleApp {
         this.leaveCurrentRoom();
       });
     }
+
+    // Canvas Toolbar Tools
+    const btnBrush = document.getElementById('btnBrush');
+    const btnEraser = document.getElementById('btnEraser');
+    const btnClear = document.getElementById('btnClear');
+    const btnUndo = document.getElementById('btnUndo');
+
+    if (btnBrush) {
+      btnBrush.addEventListener('click', () => {
+        if (window.scribbleCanvas) window.scribbleCanvas.isEraser = false;
+        btnBrush.classList.add('active');
+        if (btnEraser) btnEraser.classList.remove('active');
+      });
+    }
+
+    if (btnEraser) {
+      btnEraser.addEventListener('click', () => {
+        if (window.scribbleCanvas) window.scribbleCanvas.setEraser();
+        btnEraser.classList.add('active');
+        if (btnBrush) btnBrush.classList.remove('active');
+      });
+    }
+
+    if (btnClear) {
+      btnClear.addEventListener('click', () => {
+        if (window.scribbleCanvas) window.scribbleCanvas.clear();
+      });
+    }
+
+    if (btnUndo) {
+      btnUndo.addEventListener('click', () => {
+        if (window.scribbleCanvas) window.scribbleCanvas.undo();
+      });
+    }
+
+    // Color Swatches
+    const colorSwatches = document.querySelectorAll('.color-swatch');
+    colorSwatches.forEach(swatch => {
+      swatch.addEventListener('click', () => {
+        const col = swatch.getAttribute('data-color');
+        if (window.scribbleCanvas) window.scribbleCanvas.setColor(col);
+        colorSwatches.forEach(s => s.classList.remove('active'));
+        swatch.classList.add('active');
+        if (btnBrush) btnBrush.classList.add('active');
+        if (btnEraser) btnEraser.classList.remove('active');
+      });
+    });
 
     // Guess Input
     const guessInput = document.getElementById('guessInput');
@@ -272,7 +329,6 @@ class ScribbleApp {
     }
   }
 
-  // Socket Event Callbacks
   onRoomUpdated(room) {
     if (this.currentView === 'lobby') {
       this.renderLobbyPlayers(room);
@@ -290,11 +346,6 @@ class ScribbleApp {
     const canvasEl = document.getElementById('mainCanvas');
     if (canvasEl && !window.scribbleCanvas) {
       window.scribbleCanvas = new ScribbleCanvas(canvasEl);
-      window.scribbleCanvas.onStrokeCallback = (stroke) => {
-        if (window.socketClient && window.socketClient.currentRoom) {
-          window.socketClient.sendStroke(window.socketClient.currentRoom.code, stroke);
-        }
-      };
     } else if (window.scribbleCanvas) {
       window.scribbleCanvas.clear();
     }
@@ -439,8 +490,37 @@ class ScribbleApp {
   }
 
   onGameOver(data) {
-    alert('🏆 Game Over! Final Winner: ' + (data.leaderboard[0] ? data.leaderboard[0].name : 'Nobody'));
-    this.showProfileView();
+    const leaderboard = data.leaderboard || [];
+    const podiumEl = document.getElementById('podiumContainer');
+    
+    if (podiumEl) {
+      const p1 = leaderboard[0] || { name: 'Player 1', score: 0 };
+      const p2 = leaderboard[1] || { name: 'Player 2', score: 0 };
+      const p3 = leaderboard[2] || { name: 'Player 3', score: 0 };
+
+      podiumEl.innerHTML = `
+        <div class="podium-step second">
+          <div class="podium-medal">🥈</div>
+          <div class="podium-name">${p2.name}</div>
+          <div class="podium-score">${p2.score} pts</div>
+        </div>
+        <div class="podium-step first">
+          <div class="podium-medal">👑 🥇</div>
+          <div class="podium-name">${p1.name}</div>
+          <div class="podium-score">${p1.score} pts</div>
+        </div>
+        <div class="podium-step third">
+          <div class="podium-medal">🥉</div>
+          <div class="podium-name">${p3.name}</div>
+          <div class="podium-score">${p3.score} pts</div>
+        </div>
+      `;
+    }
+
+    const modal = document.getElementById('leaderboardModal');
+    if (modal) modal.classList.add('active');
+
+    if (window.soundEngine) window.soundEngine.playSuccessFanfare();
   }
 }
 
