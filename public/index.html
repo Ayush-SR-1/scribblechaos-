@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pixel Telephone | AI Drawing & Battleground</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
 
@@ -208,18 +208,16 @@
             <canvas id="mainCanvas"></canvas>
           </div>
 
-          <!-- Canvas Toolbar Controls (More Brushes + 26-Color Extended Palette + Keyboard Tooltips) -->
+          <!-- Canvas Toolbar Controls (5 Brushes + 26 Color Extended Palette + Size Selectors) -->
           <div class="canvas-toolbar">
             <div class="toolbar-controls-row">
-              
-              <!-- Brush Types Toolbar -->
               <button class="tool-btn active" id="btnBrush" title="Pencil Brush [B]"><i class="fa-solid fa-pen"></i></button>
               <button class="tool-btn" id="btnMarker" title="Marker / Highlighter [M]"><i class="fa-solid fa-highlighter"></i></button>
               <button class="tool-btn" id="btnSpray" title="Spray Paint [S]"><i class="fa-solid fa-spray-can"></i></button>
               <button class="tool-btn" id="btnNeon" title="Neon Glow Brush [G]"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
               <button class="tool-btn" id="btnFill" title="Bucket Fill [F]"><i class="fa-solid fa-fill-drip"></i></button>
               <button class="tool-btn" id="btnEraser" title="Eraser [E]"><i class="fa-solid fa-eraser"></i></button>
-              
+
               <div style="width: 2px; height: 24px; background: #cbd5e1; margin: 0 0.2rem;"></div>
 
               <button class="tool-btn" id="btnUndo" title="Undo [Ctrl+Z / Z]"><i class="fa-solid fa-rotate-left"></i></button>
@@ -227,7 +225,6 @@
 
               <div style="width: 2px; height: 24px; background: #cbd5e1; margin: 0 0.2rem;"></div>
 
-              <!-- Stroke Size Selector -->
               <div class="size-selector-group">
                 <button class="size-btn" data-size="4" title="Small [1]"><div class="size-dot s"></div></button>
                 <button class="size-btn active" data-size="8" title="Medium [2]"><div class="size-dot m"></div></button>
@@ -242,7 +239,6 @@
 
             <!-- Complete 26-Color Extended Palette Grid -->
             <div class="color-palette-grid">
-              <!-- Row 1: Core & Primaries -->
               <div class="color-swatch active" style="background: #000000;" data-color="#000000" title="Black"></div>
               <div class="color-swatch" style="background: #ffffff;" data-color="#ffffff" title="White"></div>
               <div class="color-swatch" style="background: #64748b;" data-color="#64748b" title="Slate Gray"></div>
@@ -257,7 +253,6 @@
               <div class="color-swatch" style="background: #ec4899;" data-color="#ec4899" title="Pink"></div>
               <div class="color-swatch" style="background: #78350f;" data-color="#78350f" title="Brown"></div>
 
-              <!-- Row 2: Secondary & Skin Tones -->
               <div class="color-swatch" style="background: #475569;" data-color="#475569" title="Dark Slate"></div>
               <div class="color-swatch" style="background: #f87171;" data-color="#f87171" title="Pastel Red"></div>
               <div class="color-swatch" style="background: #fb923c;" data-color="#fb923c" title="Pastel Orange"></div>
@@ -372,14 +367,14 @@
     <p>ScribbleChaos &copy; 2026. Powered by Node.js, Socket.IO & Multi-Brush Canvas Engine.</p>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Scripts (Cache Busted to prevent browser disk caching) -->
   <script src="/socket.io/socket.io.js"></script>
-  <script src="js/sound.js"></script>
-  <script src="js/canvas.js"></script>
-  <script src="js/socket-client.js"></script>
-  <script src="js/avatar.js"></script>
-  <script src="js/bg-3d.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/sound.js?v=3"></script>
+  <script src="js/canvas.js?v=3"></script>
+  <script src="js/socket-client.js?v=3"></script>
+  <script src="js/avatar.js?v=3"></script>
+  <script src="js/bg-3d.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
 
 </body>
 </html>
