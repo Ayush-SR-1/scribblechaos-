@@ -130,34 +130,53 @@ class ScribbleApp {
       });
     }
 
-    // Canvas Toolbar Tools
-    const btnBrush = document.getElementById('btnBrush');
+    // Canvas Brush Tools Binding
+    const brushTools = [
+      { id: 'btnBrush', type: 'pencil' },
+      { id: 'btnMarker', type: 'marker' },
+      { id: 'btnSpray', type: 'spray' },
+      { id: 'btnNeon', type: 'neon' },
+      { id: 'btnFill', type: 'fill' }
+    ];
+
+    brushTools.forEach(tool => {
+      const el = document.getElementById(tool.id);
+      if (el) {
+        el.addEventListener('click', () => {
+          if (window.scribbleCanvas) window.scribbleCanvas.setBrushType(tool.type);
+          brushTools.forEach(t => {
+            const b = document.getElementById(t.id);
+            if (b) b.classList.remove('active');
+          });
+          const btnEraser = document.getElementById('btnEraser');
+          if (btnEraser) btnEraser.classList.remove('active');
+          el.classList.add('active');
+          if (window.soundEngine) window.soundEngine.playClick();
+        });
+      }
+    });
+
     const btnEraser = document.getElementById('btnEraser');
-    const btnClear = document.getElementById('btnClear');
-    const btnUndo = document.getElementById('btnUndo');
-
-    if (btnBrush) {
-      btnBrush.addEventListener('click', () => {
-        if (window.scribbleCanvas) window.scribbleCanvas.isEraser = false;
-        btnBrush.classList.add('active');
-        if (btnEraser) btnEraser.classList.remove('active');
-      });
-    }
-
     if (btnEraser) {
       btnEraser.addEventListener('click', () => {
         if (window.scribbleCanvas) window.scribbleCanvas.setEraser();
+        brushTools.forEach(t => {
+          const b = document.getElementById(t.id);
+          if (b) b.classList.remove('active');
+        });
         btnEraser.classList.add('active');
-        if (btnBrush) btnBrush.classList.remove('active');
+        if (window.soundEngine) window.soundEngine.playClick();
       });
     }
 
+    const btnClear = document.getElementById('btnClear');
     if (btnClear) {
       btnClear.addEventListener('click', () => {
         if (window.scribbleCanvas) window.scribbleCanvas.clear();
       });
     }
 
+    const btnUndo = document.getElementById('btnUndo');
     if (btnUndo) {
       btnUndo.addEventListener('click', () => {
         if (window.scribbleCanvas) window.scribbleCanvas.undo();
@@ -168,7 +187,7 @@ class ScribbleApp {
     const sizeBtns = document.querySelectorAll('.size-btn');
     sizeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        const sz = parseInt(btn.getAttribute('data-size')) || 6;
+        const sz = parseInt(btn.getAttribute('data-size')) || 8;
         if (window.scribbleCanvas) window.scribbleCanvas.setSize(sz);
         sizeBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -176,7 +195,7 @@ class ScribbleApp {
       });
     });
 
-    // 24-Color Palette Swatches
+    // 26-Color Palette Swatches
     const colorSwatches = document.querySelectorAll('.color-swatch');
     colorSwatches.forEach(swatch => {
       swatch.addEventListener('click', () => {
@@ -184,8 +203,11 @@ class ScribbleApp {
         if (window.scribbleCanvas) window.scribbleCanvas.setColor(col);
         colorSwatches.forEach(s => s.classList.remove('active'));
         swatch.classList.add('active');
+        
+        const btnBrush = document.getElementById('btnBrush');
         if (btnBrush) btnBrush.classList.add('active');
         if (btnEraser) btnEraser.classList.remove('active');
+        if (window.soundEngine) window.soundEngine.playClick();
       });
     });
 
