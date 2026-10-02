@@ -48,27 +48,41 @@ class ScribbleCanvas {
       resizeTimer = setTimeout(() => this.resizeCanvas(), 100);
     });
 
-    // Mouse Events
-    this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
-    this.canvas.addEventListener('mousemove', (e) => this.draw(e));
-    this.canvas.addEventListener('mouseup', () => this.stopDrawing());
-    this.canvas.addEventListener('mouseleave', () => this.stopDrawing());
+    if (window.PointerEvent) {
+      // Modern Pointer Events (Unified Touch, Pen & Mouse)
+      this.canvas.addEventListener('pointerdown', (e) => {
+        if (e.cancelable) e.preventDefault();
+        this.startDrawing(e);
+      }, { passive: false });
 
-    // Touch Events - Prevent scrolling while drawing on mobile touchscreens
-    this.canvas.addEventListener('touchstart', (e) => {
-      if (e.cancelable) e.preventDefault();
-      this.startDrawing(e.touches[0]);
-    }, { passive: false });
+      this.canvas.addEventListener('pointermove', (e) => {
+        if (e.cancelable) e.preventDefault();
+        this.draw(e);
+      }, { passive: false });
 
-    this.canvas.addEventListener('touchmove', (e) => {
-      if (e.cancelable) e.preventDefault();
-      this.draw(e.touches[0]);
-    }, { passive: false });
+      this.canvas.addEventListener('pointerup', () => this.stopDrawing());
+      this.canvas.addEventListener('pointercancel', () => this.stopDrawing());
+      this.canvas.addEventListener('pointerleave', () => this.stopDrawing());
+    } else {
+      // Legacy Mouse Events
+      this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
+      this.canvas.addEventListener('mousemove', (e) => this.draw(e));
+      this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+      this.canvas.addEventListener('mouseleave', () => this.stopDrawing());
 
-    this.canvas.addEventListener('touchend', (e) => {
-      if (e.cancelable) e.preventDefault();
-      this.stopDrawing();
-    }, { passive: false });
+      // Touch Events Fallback
+      this.canvas.addEventListener('touchstart', (e) => {
+        if (e.cancelable) e.preventDefault();
+        this.startDrawing(e.touches ? e.touches[0] : e);
+      }, { passive: false });
+
+      this.canvas.addEventListener('touchmove', (e) => {
+        if (e.cancelable) e.preventDefault();
+        this.draw(e.touches ? e.touches[0] : e);
+      }, { passive: false });
+
+      this.canvas.addEventListener('touchend', () => this.stopDrawing());
+    }
   }
 
   bindKeyboardShortcuts() {
@@ -158,9 +172,21 @@ class ScribbleCanvas {
     const rect = this.canvas.getBoundingClientRect();
     const scaleX = this.canvas.width / rect.width;
     const scaleY = this.canvas.height / rect.height;
+    
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    
+    if (clientX === undefined && e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if (clientX === undefined && e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    }
+
     return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY
+      x: ((clientX || 0) - rect.left) * scaleX,
+      y: ((clientY || 0) - rect.top) * scaleY
     };
   }
 
