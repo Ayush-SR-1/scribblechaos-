@@ -54,16 +54,21 @@ class ScribbleCanvas {
     this.canvas.addEventListener('mouseup', () => this.stopDrawing());
     this.canvas.addEventListener('mouseleave', () => this.stopDrawing());
 
-    // Touch Events
+    // Touch Events - Prevent scrolling while drawing on mobile touchscreens
     this.canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
       this.startDrawing(e.touches[0]);
-    });
+    }, { passive: false });
+
     this.canvas.addEventListener('touchmove', (e) => {
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
       this.draw(e.touches[0]);
-    });
-    this.canvas.addEventListener('touchend', () => this.stopDrawing());
+    }, { passive: false });
+
+    this.canvas.addEventListener('touchend', (e) => {
+      if (e.cancelable) e.preventDefault();
+      this.stopDrawing();
+    }, { passive: false });
   }
 
   bindKeyboardShortcuts() {
