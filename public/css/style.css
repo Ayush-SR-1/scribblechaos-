@@ -1,15 +1,13 @@
-/* ScribbleChaos - Ultra-Modern Neobrutalist Design with Skribbl.io Features & 3D Background */
+/* ScribbleChaos - Ultra-Modern Neobrutalist Design with Profile Page & Settings */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700;900&display=swap');
 
 :root {
   --bg-dark: #0a0d17;
   --color-yellow: #ffcc00;
   --color-yellow-hover: #ffe033;
-  --color-green: #39ff14;
   --color-green-btn: #22c55e;
-  --color-green-hover: #16a34a;
   --color-blue-btn: #3b82f6;
-  --color-blue-hover: #2563eb;
+  --color-red-btn: #ef4444;
   --color-navy: #0f172a;
   --color-border: #1e293b;
   --color-card-bg: #ffffff;
@@ -42,7 +40,7 @@ body {
   position: relative;
 }
 
-/* 3D Animated Paint Canvas */
+/* 3D Animated Background Canvas */
 #bg3dCanvas {
   position: fixed;
   top: 0;
@@ -53,7 +51,7 @@ body {
   pointer-events: none;
 }
 
-/* Top Navigation Bar */
+/* Header Bar */
 .header-nav {
   position: relative;
   z-index: 10;
@@ -72,9 +70,7 @@ body {
   gap: 0.75rem;
   cursor: pointer;
 }
-
 .logo-icon { font-size: 2rem; }
-
 .logo-text {
   font-family: var(--font-display);
   font-size: 1.8rem;
@@ -83,60 +79,32 @@ body {
   letter-spacing: -0.5px;
 }
 
-.nav-status {
+/* Settings Top Right Icon Button */
+.btn-settings-icon {
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  border: 2.5px solid var(--color-navy);
+  box-shadow: 3px 3px 0px var(--color-navy);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.online-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(57, 255, 20, 0.15);
-  border: 2px solid var(--color-green);
-  padding: 0.4rem 1rem;
-  border-radius: 50px;
-  font-size: 0.85rem;
-  color: var(--color-green);
-  font-weight: 700;
-}
-
-.online-dot {
-  width: 9px;
-  height: 9px;
-  background: var(--color-green);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--color-green);
-  animation: pulse-dot 1.5s infinite;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
-}
-
-.btn-sound {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
-  padding: 0.45rem 0.9rem;
-  border-radius: 10px;
+  justify-content: center;
+  font-size: 1.3rem;
   cursor: pointer;
-  font-weight: 700;
   transition: all 0.2s;
 }
-.btn-sound:hover {
-  background: var(--color-yellow);
-  color: #000;
-  border-color: #000;
+.btn-settings-icon:hover {
+  transform: rotate(45deg) scale(1.08);
+  background: var(--color-yellow-hover);
 }
 
 /* Main Layout Wrapper */
 .main-wrapper {
   position: relative;
   z-index: 5;
-  max-width: 960px;
+  max-width: 900px;
   width: 100%;
   margin: 1.5rem auto;
   padding: 0 1.5rem;
@@ -144,15 +112,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
 }
 
-/* Portal Title Header */
+/* Title Block with Yellow Highlight Box behind "Pixel" */
 .portal-header-block {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 1.5rem;
 }
 
 .portal-title-row {
@@ -188,7 +156,7 @@ body {
   text-shadow: 0 2px 8px rgba(0,0,0,0.6);
 }
 
-/* Skribbl.io Style Main Portal Box Frame */
+/* Neobrutalist Main Portal Card Frame */
 .portal-card-frame {
   background: var(--color-card-bg);
   border: 3.5px solid var(--color-navy);
@@ -196,7 +164,7 @@ body {
   box-shadow: var(--shadow-neo), 0 20px 40px rgba(0,0,0,0.4);
   padding: 1.75rem;
   width: 100%;
-  max-width: 540px;
+  max-width: 520px;
   color: var(--color-card-text);
   display: flex;
   flex-direction: column;
@@ -239,7 +207,7 @@ body {
   cursor: pointer;
 }
 
-/* Skribbl.io Avatar Customizer Box */
+/* Avatar Customizer Box */
 .avatar-customizer-box {
   background: #2563eb;
   border: 2.5px solid var(--color-navy);
@@ -388,64 +356,29 @@ body {
   line-height: 1.35;
 }
 
-/* Skribbl.io Action Buttons */
-.btn-skribbl-play {
-  background: var(--color-green-btn);
-  color: #ffffff;
+/* Neobrutalist Action Buttons */
+.btn-neo-yellow {
+  background: var(--color-yellow);
+  color: var(--color-navy);
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 900;
-  padding: 1rem 1.5rem;
-  border: 3px solid var(--color-navy);
+  padding: 1.05rem 1.5rem;
+  border: 2.5px solid var(--color-navy);
   border-radius: var(--border-radius-input);
   box-shadow: var(--shadow-neo);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
   width: 100%;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
-.btn-skribbl-play:hover {
-  background: var(--color-green-hover);
+.btn-neo-yellow:hover {
   transform: translateY(-2px);
+  background: var(--color-yellow-hover);
   box-shadow: 6px 8px 0px var(--color-navy);
-}
-
-.btn-skribbl-create {
-  background: var(--color-blue-btn);
-  color: #ffffff;
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 900;
-  padding: 0.85rem 1.25rem;
-  border: 3px solid var(--color-navy);
-  border-radius: var(--border-radius-input);
-  box-shadow: var(--shadow-neo);
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-}
-.btn-skribbl-create:hover {
-  background: var(--color-blue-hover);
-  transform: translateY(-2px);
-  box-shadow: 6px 8px 0px var(--color-navy);
-}
-
-.dotted-divider {
-  border: none;
-  border-top: 2.5px dashed #cbd5e1;
-}
-
-.join-room-row {
-  display: flex;
-  gap: 0.75rem;
 }
 
 .btn-neo-white {
@@ -460,91 +393,186 @@ body {
   box-shadow: 3px 4px 0px var(--color-navy);
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 .btn-neo-white:hover {
   background: var(--color-yellow);
 }
 
-/* Skribbl.io Bottom 3-Column Cards Grid (About, News, How to Play) */
-.skribbl-info-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  width: 100%;
+/* Yellow Bottom Back Button */
+.btn-back-global {
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  padding: 0.8rem 2.2rem;
+  border: 2.5px solid var(--color-navy);
+  border-radius: 50px;
+  box-shadow: var(--shadow-neo);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-top: 1rem;
 }
+.btn-back-global:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0px var(--color-navy);
+}
 
-.info-card {
+/* Exit / Leave Button */
+.btn-exit-room {
+  background: var(--color-red-btn);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.95rem;
+  padding: 0.6rem 1.2rem;
+  border: 2.5px solid var(--color-navy);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0px var(--color-navy);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+}
+.btn-exit-room:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0px var(--color-navy);
+}
+
+.dotted-divider {
+  border: none;
+  border-top: 2.5px dashed #cbd5e1;
+}
+
+.join-room-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Modal Overlay & Card for Settings */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 13, 23, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
   background: #ffffff;
-  border: 3px solid var(--color-navy);
-  border-radius: 16px;
-  box-shadow: var(--shadow-neo);
-  padding: 1.5rem;
+  border: 3.5px solid var(--color-navy);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-neo), 0 20px 40px rgba(0,0,0,0.5);
+  width: 90%;
+  max-width: 440px;
+  padding: 1.75rem;
   color: var(--color-navy);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
-.info-card-header {
+.modal-header {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: space-between;
   border-bottom: 2px solid #e2e8f0;
   padding-bottom: 0.75rem;
 }
 
-.info-card-icon { font-size: 1.6rem; }
-.info-card-title {
+.modal-title {
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 900;
   color: var(--color-navy);
 }
 
-.info-card-body {
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: #334155;
-}
-
-.news-scroll-box {
-  max-height: 180px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  padding-right: 0.4rem;
-}
-
-.news-item-title {
-  font-weight: 800;
-  color: var(--color-navy);
-  font-size: 0.95rem;
-}
-.news-item-date {
-  font-size: 0.75rem;
+.btn-close-modal {
+  background: transparent;
+  border: none;
   color: var(--color-muted);
+  font-size: 1.6rem;
+  cursor: pointer;
 }
+.btn-close-modal:hover { color: var(--color-navy); }
 
-.how-to-play-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.step-pill {
-  background: var(--color-yellow);
-  border: 2px solid var(--color-navy);
-  padding: 0.6rem 0.8rem;
-  border-radius: 10px;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 0.95rem;
-  box-shadow: 2px 3px 0px var(--color-navy);
+.setting-row {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 2px solid var(--color-navy);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+}
+
+.setting-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  border: 2px solid var(--color-navy);
+  transition: .2s;
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--color-navy);
+  transition: .2s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--color-yellow);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(23px);
 }
 
 /* Arena & Chat Views */
@@ -651,9 +679,7 @@ body {
   cursor: pointer;
   border: 2px solid var(--color-navy);
 }
-.color-swatch.active {
-  transform: scale(1.25);
-}
+.color-swatch.active { transform: scale(1.25); }
 
 .sidebar-panel {
   background: #ffffff;
@@ -712,6 +738,5 @@ body {
 }
 
 @media (max-width: 900px) {
-  .skribbl-info-grid { grid-template-columns: 1fr; }
   .canvas-workspace { grid-template-columns: 1fr; }
 }

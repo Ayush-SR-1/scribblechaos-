@@ -1,20 +1,38 @@
 // Main Application Orchestrator for ScribbleChaos / Pixel Telephone
 class ScribbleApp {
   constructor() {
-    this.currentView = 'home';
-    this.selectedMode = 'blind_artist';
+    this.currentView = 'profile'; // 'profile', 'gameSelect', 'lobby', 'game', 'reveal'
+    this.selectedMode = 'pixel_telephone';
 
     this.init();
   }
 
   init() {
-    console.log('🚀 Pixel Telephone Skribbl UI App Initialized');
+    console.log('🚀 Pixel Telephone App Initialized');
     this.bindDOMEvents();
     if (window.socketClient) window.socketClient.init();
   }
 
   bindDOMEvents() {
-    // Mode Radio Selection Cards
+    // Stage 1: Continue to Battleground Button
+    const btnContinue = document.getElementById('btnContinueToBattleground');
+    if (btnContinue) {
+      btnContinue.addEventListener('click', () => {
+        if (window.soundEngine) window.soundEngine.playClick();
+        this.showGameSelectView();
+      });
+    }
+
+    // Stage 2: Back Button to Profile
+    const btnBackToProfile = document.getElementById('btnBackToProfile');
+    if (btnBackToProfile) {
+      btnBackToProfile.addEventListener('click', () => {
+        if (window.soundEngine) window.soundEngine.playClick();
+        this.showProfileView();
+      });
+    }
+
+    // Mode Radio Selection Cards (Stage 2)
     const radioCards = document.querySelectorAll('.mode-radio-card');
     radioCards.forEach(card => {
       card.addEventListener('click', () => {
@@ -31,25 +49,16 @@ class ScribbleApp {
       });
     });
 
-    // Green Play! Button (Instant Matchmaking)
-    const btnQuickPlay = document.getElementById('btnQuickPlay');
-    if (btnQuickPlay) {
-      btnQuickPlay.addEventListener('click', () => {
+    // Create Room Button Submit
+    const btnCreateRoomSubmit = document.getElementById('btnCreateRoomSubmit');
+    if (btnCreateRoomSubmit) {
+      btnCreateRoomSubmit.addEventListener('click', () => {
         if (window.soundEngine) window.soundEngine.playClick();
-        this.handleQuickPlay();
+        this.handleCreateRoom();
       });
     }
 
-    // Blue Create Private Room Button
-    const btnCreatePrivateRoom = document.getElementById('btnCreatePrivateRoom');
-    if (btnCreatePrivateRoom) {
-      btnCreatePrivateRoom.addEventListener('click', () => {
-        if (window.soundEngine) window.soundEngine.playClick();
-        this.handleCreatePrivateRoom();
-      });
-    }
-
-    // Join Room Button
+    // Join Room Button Submit
     const btnJoinRoomSubmit = document.getElementById('btnJoinRoomSubmit');
     const joinCodeInput = document.getElementById('joinRoomCodeInput');
     if (btnJoinRoomSubmit) {
@@ -60,18 +69,58 @@ class ScribbleApp {
       });
     }
 
-    // Sound Toggle Button
-    const btnSound = document.getElementById('btnSoundToggle');
-    if (btnSound) {
-      btnSound.addEventListener('click', () => {
-        if (window.soundEngine) {
-          window.soundEngine.enabled = !window.soundEngine.enabled;
-          btnSound.innerText = window.soundEngine.enabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
-        }
+    // Settings Modal Open / Close
+    const btnOpenSettings = document.getElementById('btnOpenSettings');
+    const btnCloseSettings = document.getElementById('btnCloseSettings');
+    const btnSaveSettings = document.getElementById('btnSaveSettings');
+    const modalSettings = document.getElementById('settingsModal');
+
+    if (btnOpenSettings && modalSettings) {
+      btnOpenSettings.addEventListener('click', () => {
+        if (window.soundEngine) window.soundEngine.playClick();
+        modalSettings.classList.add('active');
       });
     }
 
-    // Guess submission input
+    if (btnCloseSettings && modalSettings) {
+      btnCloseSettings.addEventListener('click', () => {
+        modalSettings.classList.remove('active');
+      });
+    }
+
+    if (btnSaveSettings && modalSettings) {
+      btnSaveSettings.addEventListener('click', () => {
+        const sfxToggle = document.getElementById('toggleSFX');
+        const musicToggle = document.getElementById('toggleMusic');
+
+        if (window.soundEngine) {
+          window.soundEngine.sfxEnabled = sfxToggle ? sfxToggle.checked : true;
+          window.soundEngine.toggleMusic(musicToggle ? musicToggle.checked : false);
+        }
+        modalSettings.classList.remove('active');
+        if (window.soundEngine) window.soundEngine.playClick();
+      });
+    }
+
+    // Exit Room & Exit Game Buttons
+    const btnExitLobby = document.getElementById('btnExitLobby');
+    const btnExitGame = document.getElementById('btnExitGame');
+
+    if (btnExitLobby) {
+      btnExitLobby.addEventListener('click', () => {
+        if (window.soundEngine) window.soundEngine.playClick();
+        this.leaveCurrentRoom();
+      });
+    }
+
+    if (btnExitGame) {
+      btnExitGame.addEventListener('click', () => {
+        if (window.soundEngine) window.soundEngine.playClick();
+        this.leaveCurrentRoom();
+      });
+    }
+
+    // Guess Input
     const guessInput = document.getElementById('guessInput');
     const btnSendGuess = document.getElementById('btnSendGuess');
     if (btnSendGuess && guessInput) {
@@ -130,19 +179,29 @@ class ScribbleApp {
     return val || `Artist_${Math.floor(Math.random() * 899 + 100)}`;
   }
 
-  handleQuickPlay() {
-    const playerName = this.getPlayerName();
-    if (window.socketClient) {
-      window.socketClient.playerName = playerName;
-      window.socketClient.quickMatch((res) => {
-        if (res && res.success) {
-          this.showLobbyView(res.room);
-        }
-      });
-    }
+  showProfileView() {
+    this.currentView = 'profile';
+    document.getElementById('profileView').style.display = 'flex';
+    document.getElementById('gameSelectView').style.display = 'none';
+    document.getElementById('lobbyView').style.display = 'none';
+    document.getElementById('gameArenaView').classList.remove('active');
+    document.getElementById('revealGalleryView').style.display = 'none';
   }
 
-  handleCreatePrivateRoom() {
+  showGameSelectView() {
+    this.currentView = 'gameSelect';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('gameSelectView').style.display = 'flex';
+    document.getElementById('lobbyView').style.display = 'none';
+    document.getElementById('gameArenaView').classList.remove('active');
+    document.getElementById('revealGalleryView').style.display = 'none';
+  }
+
+  goBackToHome() {
+    this.showProfileView();
+  }
+
+  handleCreateRoom() {
     const playerName = this.getPlayerName();
     if (window.socketClient) {
       window.socketClient.playerName = playerName;
@@ -168,17 +227,18 @@ class ScribbleApp {
     }
   }
 
-  goBackToHome() {
-    this.currentView = 'home';
-    document.getElementById('portalView').style.display = 'flex';
-    document.getElementById('lobbyView').style.display = 'none';
-    document.getElementById('gameArenaView').classList.remove('active');
-    document.getElementById('revealGalleryView').style.display = 'none';
+  leaveCurrentRoom() {
+    if (window.socketClient && window.socketClient.socket) {
+      window.socketClient.socket.disconnect();
+      window.socketClient.socket.connect();
+    }
+    this.showProfileView();
   }
 
   showLobbyView(room) {
     this.currentView = 'lobby';
-    document.getElementById('portalView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('gameSelectView').style.display = 'none';
     document.getElementById('lobbyView').style.display = 'block';
     document.getElementById('gameArenaView').classList.remove('active');
     document.getElementById('revealGalleryView').style.display = 'none';
@@ -212,7 +272,7 @@ class ScribbleApp {
     }
   }
 
-  // Socket event callbacks
+  // Socket Event Callbacks
   onRoomUpdated(room) {
     if (this.currentView === 'lobby') {
       this.renderLobbyPlayers(room);
@@ -221,7 +281,8 @@ class ScribbleApp {
 
   onRoundStarted(data) {
     this.currentView = 'game';
-    document.getElementById('portalView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('gameSelectView').style.display = 'none';
     document.getElementById('lobbyView').style.display = 'none';
     document.getElementById('revealGalleryView').style.display = 'none';
     document.getElementById('gameArenaView').classList.add('active');
@@ -329,7 +390,7 @@ class ScribbleApp {
           <p style="margin-top:0.4rem;">Previous input: <em>"${data.previousContent}"</em></p>
           ${data.turnType === 'describe' ? `
             <input type="text" id="telephoneDescInput" class="neo-input" placeholder="Describe the drawing above..." style="width:100%; margin-top:0.8rem;">
-            <button id="btnSubmitTelephoneDesc" class="btn-skribbl-play" style="margin-top:0.6rem; font-size:1rem;">Submit Description</button>
+            <button id="btnSubmitTelephoneDesc" class="btn-neo-yellow" style="margin-top:0.6rem; font-size:1rem;">Submit Description</button>
           ` : `
             <p style="margin-top:0.4rem; font-weight:700;">Draw based on the description above!</p>
           `}
@@ -353,7 +414,8 @@ class ScribbleApp {
 
   onTelephoneReveal(data) {
     this.currentView = 'reveal';
-    document.getElementById('portalView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('gameSelectView').style.display = 'none';
     document.getElementById('lobbyView').style.display = 'none';
     document.getElementById('gameArenaView').classList.remove('active');
     
@@ -378,7 +440,7 @@ class ScribbleApp {
 
   onGameOver(data) {
     alert('🏆 Game Over! Final Winner: ' + (data.leaderboard[0] ? data.leaderboard[0].name : 'Nobody'));
-    this.goBackToHome();
+    this.showProfileView();
   }
 }
 

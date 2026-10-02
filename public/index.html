@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixel Telephone | AI Drawing & Guessing Game</title>
+  <title>Pixel Telephone | AI Drawing & Battleground</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -12,43 +12,40 @@
   <!-- Animated 3D Paint Strokes & Splash Background Canvas -->
   <canvas id="bg3dCanvas"></canvas>
 
-  <!-- Top Navigation Header -->
+  <!-- Top Navigation Header (Removed 24/7 Server badge and old sound button; added Settings button) -->
   <header class="header-nav">
     <div class="logo-container" onclick="app.goBackToHome()">
       <div class="logo-icon">🎨</div>
       <h1 class="logo-text">ScribbleChaos</h1>
     </div>
 
-    <div class="nav-status">
-      <div class="online-badge" id="onlineBadge">
-        <span class="online-dot"></span>
-        24/7 Live Server
-      </div>
-      <button class="btn-sound" id="btnSoundToggle">🔊 Sound: ON</button>
-    </div>
+    <!-- Top Right Settings Icon Button -->
+    <button class="btn-settings-icon" id="btnOpenSettings" title="Game Settings">
+      <i class="fa-solid fa-gear"></i>
+    </button>
   </header>
 
   <!-- Main Container -->
   <main class="main-wrapper">
 
-    <!-- FRONT PORTAL VIEW (Skribbl.io Style Layout) -->
-    <div id="portalView" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+    <!-- STAGE 1: PROFILE SETUP PAGE -->
+    <div id="profileView" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
       
-      <!-- Title Block with Yellow Highlight Box behind "Pixel" -->
+      <!-- Title Block -->
       <div class="portal-header-block">
         <div class="portal-title-row">
           <span class="title-highlight-box">Pixel</span>
           <span class="title-main-text">Telephone</span>
         </div>
-        <p class="portal-subtitle">Three drawing games with an AI in the room.</p>
+        <p class="portal-subtitle">Customize your artist profile to enter the battleground.</p>
       </div>
 
-      <!-- Main Skribbl.io Portal Card Frame -->
+      <!-- Profile Setup Card Frame -->
       <div class="portal-card-frame">
         
-        <!-- Name Input & Language Select Row -->
+        <!-- Name & Language Row -->
         <div class="name-lang-row">
-          <input type="text" id="playerNameInput" class="neo-input" placeholder="Enter your name" value="ScribbleMaster">
+          <input type="text" id="playerNameInput" class="neo-input" placeholder="Your name" value="ScribbleMaster">
           <select id="languageSelect" class="neo-select">
             <option value="en" selected>English</option>
             <option value="es">Español</option>
@@ -64,12 +61,36 @@
           <!-- Dynamically rendered by avatar.js -->
         </div>
 
+        <!-- Continue Button -->
+        <button class="btn-neo-yellow" id="btnContinueToBattleground" style="margin-top: 0.5rem;">
+          Continue to Battleground <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- STAGE 2: GAME MODE SELECTION VIEW (Matches Uploaded Screenshot) -->
+    <div id="gameSelectView" style="display: none; width: 100%; flex-direction: column; align-items: center; gap: 1.5rem;">
+      
+      <!-- Title Block with Yellow Highlight Box behind "Pixel" -->
+      <div class="portal-header-block">
+        <div class="portal-title-row">
+          <span class="title-highlight-box">Pixel</span>
+          <span class="title-main-text">Telephone</span>
+        </div>
+        <p class="portal-subtitle">Three drawing games with an AI in the room.</p>
+      </div>
+
+      <!-- Neobrutalist Game Selection Card Frame -->
+      <div class="portal-card-frame">
+        
         <!-- 3 Mode Selection Radio Cards -->
         <div class="mode-selection-list">
           
-          <!-- Mode 1: Pixel Telephone -->
-          <div class="mode-radio-card" data-mode="pixel_telephone">
-            <input type="radio" name="gameMode" value="pixel_telephone" class="mode-radio-input" id="radioTelephone">
+          <!-- Mode 1: Pixel Telephone (Selected State) -->
+          <div class="mode-radio-card selected" data-mode="pixel_telephone">
+            <input type="radio" name="gameMode" value="pixel_telephone" class="mode-radio-input" id="radioTelephone" checked>
             <div class="mode-info-block">
               <div class="mode-title">Pixel Telephone</div>
               <div class="mode-desc">Draw, describe, redraw. Watch it go wrong.</div>
@@ -85,9 +106,9 @@
             </div>
           </div>
 
-          <!-- Mode 3: Blind Artist (Default Selected Yellow State) -->
-          <div class="mode-radio-card selected" data-mode="blind_artist">
-            <input type="radio" name="gameMode" value="blind_artist" class="mode-radio-input" id="radioBlindArtist" checked>
+          <!-- Mode 3: Blind Artist -->
+          <div class="mode-radio-card" data-mode="blind_artist">
+            <input type="radio" name="gameMode" value="blind_artist" class="mode-radio-input" id="radioBlindArtist">
             <div class="mode-info-block">
               <div class="mode-title">Blind Artist</div>
               <div class="mode-desc">Describe a secret scene. Others draw it. AI scores. Needs AI.</div>
@@ -96,13 +117,9 @@
 
         </div>
 
-        <!-- Skribbl.io Style Action Buttons -->
-        <button class="btn-skribbl-play" id="btnQuickPlay">
-          <i class="fa-solid fa-play"></i> Play!
-        </button>
-
-        <button class="btn-skribbl-create" id="btnCreatePrivateRoom">
-          <i class="fa-solid fa-lock"></i> Create Private Room
+        <!-- Create Room Action Button -->
+        <button class="btn-neo-yellow" id="btnCreateRoomSubmit">
+          Create room
         </button>
 
         <!-- Dotted Divider -->
@@ -118,61 +135,10 @@
 
       </div>
 
-      <!-- Bottom 3-Column Info Cards Grid (About, News, How to Play) -->
-      <section class="skribbl-info-grid">
-        
-        <!-- About Card -->
-        <div class="info-card">
-          <div class="info-card-header">
-            <span class="info-card-icon">❓</span>
-            <h3 class="info-card-title">About</h3>
-          </div>
-          <div class="info-card-body">
-            <strong>ScribbleChaos</strong> is a free online multiplayer drawing and guessing game featuring a sarcastic AI judge.
-            <br><br>
-            Compete across 3 game modes: draw speed battles, secret blind artist description matching, and multi-round telephone distortion!
-          </div>
-        </div>
-
-        <!-- News / Patch Notes Card -->
-        <div class="info-card">
-          <div class="info-card-header">
-            <span class="info-card-icon">📖</span>
-            <h3 class="info-card-title">News & Updates</h3>
-          </div>
-          <div class="info-card-body news-scroll-box">
-            <div>
-              <div class="news-item-title">🎨 Custom Avatar Customizer</div>
-              <div class="news-item-date">October 2026</div>
-              <p style="font-size: 0.85rem; color: #475569;">Added interactive eye, mouth, and skin customizer with 🎲 randomize button!</p>
-            </div>
-            <div>
-              <div class="news-item-title">✨ 3D Paint Strokes Engine</div>
-              <div class="news-item-date">October 2026</div>
-              <p style="font-size: 0.85rem; color: #475569;">Smooth 3D ribbons and fluid paint splash background effect added.</p>
-            </div>
-            <div>
-              <div class="news-item-title">🤖 Sarcastic AI Judges</div>
-              <div class="news-item-date">September 2026</div>
-              <p style="font-size: 0.85rem; color: #475569;">Dynamic AI cockiness meter (1% to 100%) integrated for speed battles.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- How to Play Guide Card -->
-        <div class="info-card">
-          <div class="info-card-header">
-            <span class="info-card-icon">✏️</span>
-            <h3 class="info-card-title">How to Play</h3>
-          </div>
-          <div class="info-card-body how-to-play-steps">
-            <div class="step-pill">1. CHOOSE A WORD!</div>
-            <div class="step-pill">2. DRAW ON CANVAS!</div>
-            <div class="step-pill">3. OUTSMART AI JUDGE!</div>
-          </div>
-        </div>
-
-      </section>
+      <!-- Yellow Back Button (Returns to Profile Setup Page) -->
+      <button class="btn-back-global" id="btnBackToProfile">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </button>
 
     </div>
 
@@ -183,11 +149,17 @@
           <h3 style="font-family: var(--font-display); font-size: 1.8rem;">
             ROOM CODE: <span id="lobbyCodeDisplay" style="background: var(--color-yellow); padding: 0.2rem 0.6rem; border-radius: 6px; border: 2.5px solid var(--color-navy);">------</span>
           </h3>
-          <span style="font-weight: 700; color: var(--color-muted);" id="lobbyModeBadge">MODE: BLIND ARTIST</span>
+          <span style="font-weight: 700; color: var(--color-muted);" id="lobbyModeBadge">MODE: PIXEL TELEPHONE</span>
         </div>
-        <button class="btn-skribbl-play" id="btnLobbyStart" style="display: none; width: auto; padding: 0.6rem 1.4rem; font-size: 1.1rem;">
-          Start Game
-        </button>
+        
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <button class="btn-neo-yellow" id="btnLobbyStart" style="display: none; width: auto; padding: 0.6rem 1.4rem; font-size: 1.1rem;">
+            Start Game
+          </button>
+          <button class="btn-exit-room" id="btnExitLobby">
+            <i class="fa-solid fa-door-open"></i> Exit Room
+          </button>
+        </div>
       </div>
 
       <div style="margin-top: 1.5rem; background: #ffffff; padding: 2rem; border-radius: 16px; border: 3.5px solid var(--color-navy); box-shadow: var(--shadow-neo);">
@@ -206,8 +178,12 @@
         <div class="game-prompt-badge" id="promptText">
           Prompt: Loading...
         </div>
-        <div class="game-timer-badge" id="timerDisplay">
-          60s
+        
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div class="game-timer-badge" id="timerDisplay">60s</div>
+          <button class="btn-exit-room" id="btnExitGame">
+            <i class="fa-solid fa-door-open"></i> Exit Game
+          </button>
         </div>
       </div>
 
@@ -215,7 +191,7 @@
       <div id="mode2BlindBox" style="display: none;">
         <div style="background: #ffffff; border: 3.5px solid var(--color-navy); padding: 1.2rem; border-radius: 16px; box-shadow: var(--shadow-neo); display: flex; gap: 1rem; align-items: center;">
           <input type="text" id="blindDescInput" class="neo-input" placeholder="Type a secret scene description..." style="flex: 1;">
-          <button id="btnSubmitBlindDesc" class="btn-skribbl-play" style="width: auto; padding: 0.8rem 1.5rem; font-size: 1rem;">
+          <button id="btnSubmitBlindDesc" class="btn-neo-yellow" style="width: auto; padding: 0.8rem 1.5rem; font-size: 1rem;">
             Submit Scene
           </button>
         </div>
@@ -249,7 +225,7 @@
             <div class="color-swatch" style="background: #00cc66;" data-color="#00cc66"></div>
             <div class="color-swatch" style="background: #9933ff;" data-color="#9933ff"></div>
 
-            <button id="btnSubmitCanvas" class="btn-skribbl-play" style="margin-left: auto; width: auto; padding: 0.5rem 1.2rem; font-size: 0.95rem;">
+            <button id="btnSubmitCanvas" class="btn-neo-yellow" style="margin-left: auto; width: auto; padding: 0.5rem 1.2rem; font-size: 0.95rem;">
               <i class="fa-solid fa-check"></i> Finish Drawing
             </button>
           </div>
@@ -268,7 +244,7 @@
           <!-- Mode 1 Guess Input Box -->
           <div class="join-room-row" id="mode1GuessBox">
             <input type="text" id="guessInput" class="neo-input" placeholder="Type your guess..." style="flex: 1;">
-            <button id="btnSendGuess" class="btn-skribbl-play" style="width: auto; padding: 0.8rem 1rem;">
+            <button id="btnSendGuess" class="btn-neo-yellow" style="width: auto; padding: 0.8rem 1rem;">
               <i class="fa-solid fa-paper-plane"></i>
             </button>
           </div>
@@ -285,6 +261,9 @@
           🎭 Pixel Telephone Chain Reveal
         </h2>
         <p id="telephoneSummary" style="color: var(--color-yellow); font-size: 1.2rem; margin-top: 0.5rem; font-weight: 700;"></p>
+        <button class="btn-back-global" onclick="app.goBackToHome()" style="margin-top: 1rem;">
+          <i class="fa-solid fa-house"></i> Return Home
+        </button>
       </div>
 
       <div id="telephoneGallery" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
@@ -294,9 +273,43 @@
 
   </main>
 
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-sliders"></i> Audio Settings</h3>
+        <button class="btn-close-modal" id="btnCloseSettings">&times;</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- SFX Toggle -->
+        <div class="setting-row">
+          <span class="setting-label">Sound Effects</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleSFX" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Music Toggle -->
+        <div class="setting-row">
+          <span class="setting-label">Arcade Background Music</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleMusic">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn-neo-yellow" id="btnSaveSettings" style="margin-top: 0.5rem;">
+        Save Settings
+      </button>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="footer-bar">
-    <p>Pixel Telephone &copy; 2026. Powered by Node.js, Socket.IO & 3D Animated Paint Canvas Engine.</p>
+    <p>ScribbleChaos &copy; 2026. Powered by Node.js, Socket.IO & 3D Animated Paint Canvas Engine.</p>
   </footer>
 
   <!-- Scripts -->
