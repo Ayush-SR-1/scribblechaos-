@@ -428,6 +428,16 @@ class ScribbleCanvas {
     }
   }
 
+  loadDataUrl(dataUrl) {
+    if (!dataUrl) return;
+    const img = new Image();
+    img.onload = () => {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+    };
+    img.src = dataUrl;
+  }
+
   getDataUrl() {
     return this.canvas.toDataURL('image/png');
   }

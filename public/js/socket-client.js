@@ -1,4 +1,4 @@
-// Socket.IO Client Module for ScribbleChaos
+// Socket.IO Client Module for ScribbleChaos (Skribbl Engine)
 class SocketClient {
   constructor() {
     this.socket = null;
@@ -16,12 +16,10 @@ class SocketClient {
 
     this.socket.on('connect', () => {
       console.log('✅ Socket connected:', this.socket.id);
-      this.updateStatusBadge(true);
     });
 
     this.socket.on('disconnect', () => {
       console.warn('❌ Socket disconnected');
-      this.updateStatusBadge(false);
     });
 
     this.socket.on('room_updated', (room) => {
@@ -29,20 +27,52 @@ class SocketClient {
       if (window.app) window.app.onRoomUpdated(room);
     });
 
-    this.socket.on('round_started', (data) => {
-      if (window.app) window.app.onRoundStarted(data);
+    this.socket.on('word_selection_phase', (data) => {
+      if (window.app) window.app.onWordSelectionPhase(data);
+    });
+
+    this.socket.on('choose_word_prompt', (data) => {
+      if (window.app) window.app.onChooseWordPrompt(data);
+    });
+
+    this.socket.on('drawing_phase_started', (data) => {
+      if (window.app) window.app.onDrawingPhaseStarted(data);
+    });
+
+    this.socket.on('hint_updated', (data) => {
+      if (window.app) window.app.onHintUpdated(data);
     });
 
     this.socket.on('timer_tick', (data) => {
       if (window.app) window.app.onTimerTick(data);
     });
 
-    this.socket.on('ai_commentary', (data) => {
-      if (window.app) window.app.onAICommentary(data);
+    this.socket.on('turn_ended', (data) => {
+      if (window.app) window.app.onTurnEnded(data);
     });
 
-    this.socket.on('guess_result', (data) => {
-      if (window.app) window.app.onGuessResult(data);
+    this.socket.on('correct_guess', (data) => {
+      if (window.app) window.app.onCorrectGuess(data);
+    });
+
+    this.socket.on('close_guess', (data) => {
+      if (window.app) window.app.onCloseGuess(data);
+    });
+
+    this.socket.on('chat_blocked', (data) => {
+      if (window.app) window.app.onChatBlocked(data);
+    });
+
+    this.socket.on('chat_message', (data) => {
+      if (window.app) window.app.onChatMessage(data);
+    });
+
+    this.socket.on('vote_kick_updated', (data) => {
+      if (window.app) window.app.onVoteKickUpdated(data);
+    });
+
+    this.socket.on('player_removed', (data) => {
+      if (window.app) window.app.onPlayerRemoved(data);
     });
 
     this.socket.on('receive_stroke', (stroke) => {
@@ -53,20 +83,8 @@ class SocketClient {
       if (window.scribbleCanvas) window.scribbleCanvas.clear();
     });
 
-    this.socket.on('blind_description_set', (data) => {
-      if (window.app) window.app.onBlindDescriptionSet(data);
-    });
-
-    this.socket.on('blind_evaluation_result', (data) => {
-      if (window.app) window.app.onBlindEvaluationResult(data);
-    });
-
-    this.socket.on('telephone_next_turn', (data) => {
-      if (window.app) window.app.onTelephoneNextTurn(data);
-    });
-
-    this.socket.on('telephone_reveal', (data) => {
-      if (window.app) window.app.onTelephoneReveal(data);
+    this.socket.on('load_canvas_state', (data) => {
+      if (window.scribbleCanvas && data.dataUrl) window.scribbleCanvas.loadDataUrl(data.dataUrl);
     });
 
     this.socket.on('game_over', (data) => {
@@ -74,46 +92,38 @@ class SocketClient {
     });
   }
 
-  updateStatusBadge(online) {
-    const badge = document.getElementById('onlineBadge');
-    if (badge) {
-      badge.innerHTML = online 
-        ? `<span class="online-dot"></span> 24/7 Server Live` 
-        : `<span class="online-dot" style="background:#ff0055"></span> Offline`;
-    }
-  }
-
-  createRoom(mode, maxPlayers, roundTime, callback) {
+  createRoom(settings, avatar, callback) {
     if (!this.socket) return;
     this.socket.emit('create_room', {
       playerName: this.playerName,
-      mode,
-      maxPlayers,
-      roundTime
+      settings,
+      avatar
     }, callback);
   }
 
-  joinRoom(roomCode, callback) {
+  joinRoom(roomCode, avatar, callback) {
     if (!this.socket) return;
     this.socket.emit('join_room', {
       roomCode,
-      playerName: this.playerName
+      playerName: this.playerName,
+      avatar
     }, callback);
   }
 
-  quickMatch(callback) {
+  quickMatch(avatar, callback) {
     if (!this.socket) return;
     this.socket.emit('quick_match', {
-      playerName: this.playerName
+      playerName: this.playerName,
+      avatar
     }, callback);
-  }
-
-  toggleReady(roomCode) {
-    if (this.socket) this.socket.emit('toggle_ready', { roomCode });
   }
 
   startGame(roomCode) {
     if (this.socket) this.socket.emit('start_game', { roomCode });
+  }
+
+  selectWord(roomCode, word) {
+    if (this.socket) this.socket.emit('select_word', { roomCode, word });
   }
 
   sendStroke(roomCode, strokeData) {
@@ -124,20 +134,20 @@ class SocketClient {
     if (this.socket) this.socket.emit('clear_canvas', { roomCode });
   }
 
-  submitGuess(roomCode, guessText) {
-    if (this.socket) this.socket.emit('submit_guess', { roomCode, guessText });
+  sendChat(roomCode, messageText) {
+    if (this.socket) this.socket.emit('send_chat', { roomCode, messageText });
   }
 
-  submitBlindDescription(roomCode, description) {
-    if (this.socket) this.socket.emit('submit_blind_description', { roomCode, description });
+  kickPlayer(roomCode, playerId) {
+    if (this.socket) this.socket.emit('kick_player', { roomCode, playerId });
   }
 
-  submitDrawing(roomCode, drawingDataUrl) {
-    if (this.socket) this.socket.emit('submit_drawing', { roomCode, drawingDataUrl });
+  voteKick(roomCode, targetPlayerId) {
+    if (this.socket) this.socket.emit('vote_kick', { roomCode, targetPlayerId });
   }
 
-  submitTelephoneDescription(roomCode, description) {
-    if (this.socket) this.socket.emit('submit_telephone_description', { roomCode, description });
+  playAgain(roomCode) {
+    if (this.socket) this.socket.emit('play_again', { roomCode });
   }
 }
 

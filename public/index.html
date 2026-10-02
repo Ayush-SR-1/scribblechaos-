@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixel Telephone | AI Drawing & Battleground</title>
+  <title>ScribbleChaos | Real-Time Multiplayer Drawing & Guessing Game</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 
@@ -19,25 +19,30 @@
       <h1 class="logo-text">ScribbleChaos</h1>
     </div>
 
-    <!-- Top Right Settings Icon Button -->
-    <button class="btn-settings-icon" id="btnOpenSettings" title="Game Settings">
-      <i class="fa-solid fa-gear"></i>
-    </button>
+    <!-- Top Right Controls -->
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <button class="btn-settings-icon" id="btnOpenHowToPlay" title="How to Play">
+        <i class="fa-solid fa-circle-question"></i>
+      </button>
+      <button class="btn-settings-icon" id="btnOpenSettings" title="Game Settings">
+        <i class="fa-solid fa-gear"></i>
+      </button>
+    </div>
   </header>
 
   <!-- Main Container -->
   <main class="main-wrapper">
 
-    <!-- STAGE 1: PROFILE SETUP PAGE -->
-    <div id="profileView" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+    <!-- STAGE 1: PROFILE SETUP & ROOM PORTAL -->
+    <div id="profileView" class="view-stage">
       
       <!-- Title Block -->
       <div class="portal-header-block">
         <div class="portal-title-row">
           <span class="title-highlight-box">Pixel</span>
-          <span class="title-main-text">Telephone</span>
+          <span class="title-main-text">Battleground</span>
         </div>
-        <p class="portal-subtitle">Customize your artist profile to enter the battleground.</p>
+        <p class="portal-subtitle">Real-time multiplayer drawing & guessing game!</p>
       </div>
 
       <!-- Profile Setup Card Frame -->
@@ -45,14 +50,14 @@
         
         <!-- Name & Language Row -->
         <div class="name-lang-row">
-          <input type="text" id="playerNameInput" class="neo-input" placeholder="Your name" value="ScribbleMaster">
-          <select id="languageSelect" class="neo-select">
-            <option value="en" selected>English</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-            <option value="de">Deutsch</option>
-            <option value="pt">Português</option>
-            <option value="hi">Hindi</option>
+          <input type="text" id="playerNameInput" class="neo-input" placeholder="Your Name" value="ScribbleArtist">
+          <select id="languageSelect" class="neo-select" title="Language Selector">
+            <option value="en" selected>🇬🇧 English</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="pt">🇵🇹 Português</option>
+            <option value="hi">🇮🇳 Hindi</option>
           </select>
         </div>
 
@@ -61,100 +66,44 @@
           <!-- Dynamically rendered by avatar.js -->
         </div>
 
-        <!-- Continue Button -->
-        <button class="btn-neo-yellow" id="btnContinueToBattleground" style="margin-top: 0.5rem;">
-          Continue to Battleground <i class="fa-solid fa-arrow-right"></i>
-        </button>
-
-      </div>
-
-    </div>
-
-    <!-- STAGE 2: GAME MODE SELECTION VIEW -->
-    <div id="gameSelectView" style="display: none; width: 100%; flex-direction: column; align-items: center; gap: 1.5rem;">
-      
-      <!-- Title Block -->
-      <div class="portal-header-block">
-        <div class="portal-title-row">
-          <span class="title-highlight-box">Pixel</span>
-          <span class="title-main-text">Telephone</span>
-        </div>
-        <p class="portal-subtitle">Three drawing games with an AI in the room.</p>
-      </div>
-
-      <!-- Neobrutalist Game Selection Card Frame -->
-      <div class="portal-card-frame">
-        
-        <!-- 3 Mode Selection Radio Cards -->
-        <div class="mode-selection-list">
-          
-          <!-- Mode 1: Pixel Telephone -->
-          <div class="mode-radio-card selected" data-mode="pixel_telephone">
-            <input type="radio" name="gameMode" value="pixel_telephone" class="mode-radio-input" id="radioTelephone" checked>
-            <div class="mode-info-block">
-              <div class="mode-title">Pixel Telephone</div>
-              <div class="mode-desc">Draw, describe, redraw. Watch it go wrong.</div>
-            </div>
-          </div>
-
-          <!-- Mode 2: AI Judges Your Drawing -->
-          <div class="mode-radio-card" data-mode="ai_judges">
-            <input type="radio" name="gameMode" value="ai_judges" class="mode-radio-input" id="radioAIJudges">
-            <div class="mode-info-block">
-              <div class="mode-title">AI Judges Your Drawing</div>
-              <div class="mode-desc">The AI guesses fast and gets cockier each miss. Needs AI.</div>
-            </div>
-          </div>
-
-          <!-- Mode 3: Blind Artist -->
-          <div class="mode-radio-card" data-mode="blind_artist">
-            <input type="radio" name="gameMode" value="blind_artist" class="mode-radio-input" id="radioBlindArtist">
-            <div class="mode-info-block">
-              <div class="mode-title">Blind Artist</div>
-              <div class="mode-desc">Describe a secret scene. Others draw it. AI scores. Needs AI.</div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Create Room Action Button -->
-        <button class="btn-neo-yellow" id="btnCreateRoomSubmit">
-          Create room
-        </button>
-
-        <!-- Dotted Divider -->
-        <hr class="dotted-divider">
-
-        <!-- Room Code & Join Room Action Row -->
-        <div class="join-room-row">
-          <input type="text" id="joinRoomCodeInput" class="neo-input" placeholder="ROOM CODE" style="text-transform: uppercase;">
-          <button class="btn-neo-white" id="btnJoinRoomSubmit">
-            Join room
+        <!-- Action Buttons: Play Public vs Create Private Room -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+          <button class="btn-neo-yellow" id="btnPlayPublic">
+            <i class="fa-solid fa-play"></i> Play Public Game
           </button>
+          
+          <button class="btn-neo-white" id="btnOpenCreateRoomModal">
+            <i class="fa-solid fa-lock"></i> Create Private Room
+          </button>
+
+          <!-- Join via Code Row -->
+          <div class="join-room-row" style="margin-top: 0.25rem;">
+            <input type="text" id="joinRoomCodeInput" class="neo-input" placeholder="ROOM CODE" style="text-transform: uppercase;">
+            <button class="btn-neo-white" id="btnJoinRoomSubmit">
+              Join Room
+            </button>
+          </div>
         </div>
 
       </div>
-
-      <!-- Yellow Back Button -->
-      <button class="btn-back-global" id="btnBackToProfile">
-        <i class="fa-solid fa-arrow-left"></i> Back
-      </button>
 
     </div>
 
     <!-- ROOM LOBBY VIEW -->
-    <div id="lobbyView" style="display: none; width: 100%;">
+    <div id="lobbyView" class="view-stage" style="display: none;">
       <div class="game-header-bar">
         <div>
           <h3 style="font-family: var(--font-display); font-size: 1.4rem; display: flex; align-items: center;">
             ROOM CODE: <span class="lobby-room-code-badge" id="lobbyCodeDisplay">------</span>
           </h3>
-          <div style="font-weight: 700; color: var(--color-muted); font-size: 0.85rem; margin-top: 0.2rem;" id="lobbyModeBadge">MODE: PIXEL TELEPHONE</div>
+          <div style="font-weight: 700; color: var(--color-muted); font-size: 0.85rem; margin-top: 0.2rem;" id="lobbySettingsBadge">
+            3 Rounds | 60s Draw | 8 Players Max
+          </div>
         </div>
         
         <div style="display: flex; gap: 0.75rem; align-items: center;">
           <button class="btn-neo-yellow" id="btnLobbyStart" style="display: none; width: auto; padding: 0.6rem 1.4rem; font-size: 1rem;">
-            Start Game
+            <i class="fa-solid fa-play"></i> Start Game
           </button>
           <button class="btn-exit-room" id="btnExitLobby">
             <i class="fa-solid fa-door-open"></i> Exit Room
@@ -162,54 +111,67 @@
         </div>
       </div>
 
-      <div style="margin-top: 1.5rem; background: #ffffff; padding: 2rem; border-radius: 16px; border: 3.5px solid var(--color-navy); box-shadow: var(--shadow-neo);">
-        <h4 style="margin-bottom: 1rem; color: var(--color-navy);">Players in Room (<span id="playerCount">1</span>/8):</h4>
-        <div id="lobbyPlayersList" style="display: flex; flex-direction: column; gap: 0.8rem;">
+      <div style="margin-top: 1.5rem; background: #ffffff; padding: 1.75rem; border-radius: 16px; border: 3.5px solid var(--color-navy); box-shadow: var(--shadow-neo);">
+        <h4 style="margin-bottom: 1rem; color: var(--color-navy); font-family: var(--font-display);">Players in Lobby (<span id="playerCount">1</span>/<span id="maxPlayerCount">8</span>):</h4>
+        <div id="lobbyPlayersList" class="lobby-players-grid">
           <!-- Dynamically populated -->
         </div>
       </div>
     </div>
 
-    <!-- ACTIVE GAME ARENA VIEW -->
+    <!-- ACTIVE GAME ARENA VIEW (3-COLUMN SKRIBBL DESKTOP LAYOUT) -->
     <div id="gameArenaView" class="game-arena-container">
       
-      <!-- Top Arena Status Bar -->
+      <!-- Top Arena Header Status Bar -->
       <div class="game-header-bar">
-        <div class="game-prompt-badge" id="promptText">
-          Prompt: Loading...
-        </div>
-        
         <div style="display: flex; align-items: center; gap: 1rem;">
+          <div class="round-badge" id="roundDisplay">Round 1 of 3</div>
           <div class="game-timer-badge" id="timerDisplay">60s</div>
-          <button class="btn-exit-room" id="btnExitGame">
-            <i class="fa-solid fa-door-open"></i> Exit Game
-          </button>
         </div>
-      </div>
 
-      <!-- Mode 2 & Mode 3 Interactive Action Boxes -->
-      <div id="mode2BlindBox" style="display: none;">
-        <div style="background: #ffffff; border: 3.5px solid var(--color-navy); padding: 1.2rem; border-radius: 16px; box-shadow: var(--shadow-neo); display: flex; gap: 1rem; align-items: center;">
-          <input type="text" id="blindDescInput" class="neo-input" placeholder="Type a secret scene description..." style="flex: 1;">
-          <button id="btnSubmitBlindDesc" class="btn-neo-yellow" style="width: auto; padding: 0.8rem 1.5rem; font-size: 1rem;">
-            Submit Scene
-          </button>
+        <div class="word-hint-badge" id="wordHintDisplay">
+          _ _ _ _ _
         </div>
-      </div>
-
-      <div id="mode3TelephoneBox" style="display: none;"></div>
-
-      <!-- Canvas Workspace & Sidebar -->
-      <div class="canvas-workspace">
         
-        <div>
-          <!-- HTML5 Canvas Board -->
-          <div class="canvas-board-wrapper">
+        <button class="btn-exit-room" id="btnExitGame">
+          <i class="fa-solid fa-door-open"></i> Exit
+        </button>
+      </div>
+
+      <!-- 3-Column Arena Grid Workspace -->
+      <div class="skribbl-3col-workspace">
+        
+        <!-- LEFT COLUMN: Players Leaderboard Panel -->
+        <div class="player-leaderboard-panel" id="playerLeaderboardList">
+          <!-- Dynamically populated with player ranks, scores, drawer icon ✏️, and delta badges -->
+        </div>
+
+        <!-- CENTER COLUMN: Canvas Board & Drawing Toolbar -->
+        <div class="canvas-center-column">
+          
+          <div class="canvas-board-wrapper" id="canvasBoardWrapper">
             <canvas id="mainCanvas"></canvas>
+
+            <!-- WORD SELECTION OVERLAY (Drawer Only) -->
+            <div class="canvas-overlay" id="wordSelectionOverlay" style="display: none;">
+              <h3 style="font-family: var(--font-display); font-size: 1.6rem; color: var(--color-navy);">Choose a Word to Draw!</h3>
+              <p style="font-size: 0.95rem; color: var(--color-muted);">You have <span id="selectWordTimer">15</span>s to choose:</p>
+              <div class="word-choices-row" id="wordChoicesContainer">
+                <!-- Dynamically populated 3 choices -->
+              </div>
+            </div>
+
+            <!-- TURN END / WORD REVEAL OVERLAY -->
+            <div class="canvas-overlay" id="turnEndOverlay" style="display: none;">
+              <h3 style="font-family: var(--font-display); font-size: 1.5rem; color: var(--color-navy);" id="turnEndReasonTitle">Turn Ended!</h3>
+              <p style="font-size: 1.1rem; font-weight: 700;">The word was: <span class="revealed-word-text" id="revealedWordText">APPLE</span></p>
+              <div id="turnEndScoresList" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem;"></div>
+            </div>
+
           </div>
 
-          <!-- Canvas Toolbar Controls (5 Brushes + 26 Color Extended Palette + Size Selectors) -->
-          <div class="canvas-toolbar">
+          <!-- Canvas Drawing Toolbar -->
+          <div class="canvas-toolbar" id="drawingToolbar">
             <div class="toolbar-controls-row">
               <button class="tool-btn active" id="btnBrush" title="Pencil Brush [B]"><i class="fa-solid fa-pen"></i></button>
               <button class="tool-btn" id="btnMarker" title="Marker / Highlighter [M]"><i class="fa-solid fa-highlighter"></i></button>
@@ -228,13 +190,9 @@
               <div class="size-selector-group">
                 <button class="size-btn" data-size="4" title="Small [1]"><div class="size-dot s"></div></button>
                 <button class="size-btn active" data-size="8" title="Medium [2]"><div class="size-dot m"></div></button>
-                <button class="size-btn" data-size="16" title="Large [3]"><div class="size-dot l"></div></button>
-                <button class="size-btn" data-size="26" title="Extra Large [4]"><div class="size-dot xl"></div></button>
+                <button class="size-btn" data-size="14" title="Large [3]"><div class="size-dot l"></div></button>
+                <button class="size-btn" data-size="22" title="Extra Large [4]"><div class="size-dot xl"></div></button>
               </div>
-
-              <button id="btnSubmitCanvas" class="btn-neo-yellow" style="margin-left: auto; width: auto; padding: 0.45rem 1.1rem; font-size: 0.95rem;">
-                <i class="fa-solid fa-check"></i> Finish Drawing
-              </button>
             </div>
 
             <!-- Complete 26-Color Extended Palette Grid -->
@@ -268,21 +226,22 @@
               <div class="color-swatch" style="background: #1e1b4b;" data-color="#1e1b4b" title="Midnight Navy"></div>
             </div>
           </div>
+
         </div>
 
-        <!-- Sidebar Guess & Chat Panel -->
+        <!-- RIGHT COLUMN: Live Chat & Guess Feed -->
         <div class="sidebar-panel">
           <div class="sidebar-title">
-            <i class="fa-solid fa-comments"></i> Live AI Guesses & Chat
+            <i class="fa-solid fa-comments"></i> Live Chat & Guesses
           </div>
 
           <div class="guesses-feed" id="guessesFeed">
-            <!-- Populated via Socket.IO -->
+            <div class="guess-msg sys">🎮 Welcome to ScribbleChaos! Type your guesses below.</div>
           </div>
 
-          <!-- Mode 1 Guess Input Box -->
-          <div class="join-room-row" id="mode1GuessBox">
-            <input type="text" id="guessInput" class="neo-input" placeholder="Type your guess..." style="flex: 1;">
+          <!-- Guess & Chat Input Row -->
+          <div class="join-room-row" id="chatInputBox">
+            <input type="text" id="guessInput" class="neo-input" placeholder="Type your guess here..." style="flex: 1;">
             <button id="btnSendGuess" class="btn-neo-yellow" style="width: auto; padding: 0.8rem 1rem;">
               <i class="fa-solid fa-paper-plane"></i>
             </button>
@@ -293,30 +252,123 @@
 
     </div>
 
-    <!-- REVEAL GALLERY VIEW -->
-    <div id="revealGalleryView" style="display: none; width: 100%;">
-      <div style="text-align: center; margin-bottom: 2rem;">
-        <h2 style="font-family: var(--font-display); font-size: 2.5rem; color: #ffffff; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">
-          🎭 Pixel Telephone Chain Reveal
-        </h2>
-        <p id="telephoneSummary" style="color: var(--color-yellow); font-size: 1.2rem; margin-top: 0.5rem; font-weight: 700;"></p>
-        <button class="btn-back-global" onclick="app.goBackToHome()" style="margin-top: 1rem;">
-          <i class="fa-solid fa-house"></i> Return Home
-        </button>
-      </div>
-
-      <div id="telephoneGallery" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
-        <!-- Populated dynamically -->
-      </div>
-    </div>
-
   </main>
+
+  <!-- CREATE PRIVATE ROOM SETTINGS MODAL -->
+  <div class="modal-overlay" id="createRoomModal">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-sliders"></i> Private Room Settings</h3>
+        <button class="btn-close-modal" id="btnCloseCreateRoomModal">&times;</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem; max-height: 65vh; overflow-y: auto; padding-right: 0.25rem;">
+        
+        <div class="setting-row">
+          <span class="setting-label">Max Players</span>
+          <select id="settingMaxPlayers" class="neo-select" style="max-width: 110px;">
+            <option value="2">2 Players</option>
+            <option value="4">4 Players</option>
+            <option value="8" selected>8 Players</option>
+            <option value="12">12 Players</option>
+            <option value="16">16 Players</option>
+            <option value="20">20 Players</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">Draw Time</span>
+          <select id="settingDrawTime" class="neo-select" style="max-width: 110px;">
+            <option value="30">30 seconds</option>
+            <option value="45">45 seconds</option>
+            <option value="60" selected>60 seconds</option>
+            <option value="90">90 seconds</option>
+            <option value="120">120 seconds</option>
+            <option value="180">180 seconds</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">Rounds</span>
+          <select id="settingTotalRounds" class="neo-select" style="max-width: 110px;">
+            <option value="2">2 Rounds</option>
+            <option value="3" selected>3 Rounds</option>
+            <option value="5">5 Rounds</option>
+            <option value="8">8 Rounds</option>
+            <option value="10">10 Rounds</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">Word Choices per Turn</span>
+          <select id="settingWordChoicesCount" class="neo-select" style="max-width: 110px;">
+            <option value="1">1 Choice</option>
+            <option value="2">2 Choices</option>
+            <option value="3" selected>3 Choices</option>
+            <option value="4">4 Choices</option>
+            <option value="5">5 Choices</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">Hints Count</span>
+          <select id="settingHintsCount" class="neo-select" style="max-width: 110px;">
+            <option value="0">0 Hints</option>
+            <option value="1">1 Hint</option>
+            <option value="2" selected>2 Hints</option>
+            <option value="3">3 Hints</option>
+            <option value="4">4 Hints</option>
+          </select>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+          <span class="setting-label">Custom Words (Comma-Separated)</span>
+          <textarea id="settingCustomWords" class="neo-input" rows="3" placeholder="e.g. Pikachu, Antigravity, Cyberpunk, Laptop"></textarea>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">Use Custom Words Only</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="settingCustomWordsOnly">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+
+      <button class="btn-neo-yellow" id="btnConfirmCreateRoom" style="margin-top: 0.5rem;">
+        <i class="fa-solid fa-check"></i> Create Room & Copy Link
+      </button>
+    </div>
+  </div>
+
+  <!-- HOW TO PLAY MODAL -->
+  <div class="modal-overlay" id="howToPlayModal">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-circle-question"></i> How to Play</h3>
+        <button class="btn-close-modal" id="btnCloseHowToPlay">&times;</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.95rem; line-height: 1.5; color: var(--color-navy);">
+        <p><strong>1. Join or Create a Room:</strong> Customize your artist name and avatar, then click <em>Play Public</em> or create a private room for your friends.</p>
+        <p><strong>2. Drawing Phase:</strong> When it's your turn to draw, choose 1 of 3 word prompts. Use your brushes and colors to draw the secret word on the canvas before time runs out!</p>
+        <p><strong>3. Guessing Phase:</strong> When another player draws, type your guess into the live chat box. The faster you guess, the more points you score!</p>
+        <p><strong>4. Progressive Hints:</strong> Blank underscores (<code>_ _ _ _</code>) will reveal random letters over time to help you guess.</p>
+        <p><strong>5. Winning:</strong> After all rounds finish, the artist with the highest score wins 1st place on the victory podium!</p>
+      </div>
+
+      <button class="btn-neo-yellow" id="btnGotItHowToPlay" style="margin-top: 0.5rem;">
+        Got it! Let's Draw 🎨
+      </button>
+    </div>
+  </div>
 
   <!-- LEADERBOARD VICTORY PODIUM MODAL -->
   <div class="modal-overlay" id="leaderboardModal">
-    <div class="modal-card" style="max-width: 520px; text-align: center;">
+    <div class="modal-card" style="max-width: 540px; text-align: center;">
       <div class="modal-header">
-        <h3 class="modal-title"><i class="fa-solid fa-trophy" style="color: var(--color-yellow);"></i> Battleground Leaderboard</h3>
+        <h3 class="modal-title"><i class="fa-solid fa-trophy" style="color: var(--color-yellow);"></i> Battleground Champions</h3>
         <button class="btn-close-modal" id="btnCloseLeaderboard">&times;</button>
       </div>
 
@@ -324,13 +376,13 @@
         <!-- Dynamically rendered -->
       </div>
 
-      <button class="btn-neo-yellow" onclick="app.goBackToHome()">
-        Return to Battleground
+      <button class="btn-neo-yellow" id="btnPlayAgain" style="margin-top: 0.5rem;">
+        <i class="fa-solid fa-rotate-right"></i> Play Again
       </button>
     </div>
   </div>
 
-  <!-- SETTINGS MODAL -->
+  <!-- AUDIO SETTINGS MODAL -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -367,14 +419,14 @@
     <p>ScribbleChaos &copy; 2026. Powered by Node.js, Socket.IO & Multi-Brush Canvas Engine.</p>
   </footer>
 
-  <!-- Scripts (Cache Busted to prevent browser disk caching) -->
+  <!-- Scripts (Cache Busted v=7) -->
   <script src="/socket.io/socket.io.js"></script>
-  <script src="js/sound.js?v=6"></script>
-  <script src="js/canvas.js?v=6"></script>
-  <script src="js/socket-client.js?v=6"></script>
-  <script src="js/avatar.js?v=6"></script>
-  <script src="js/bg-3d.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/sound.js?v=7"></script>
+  <script src="js/canvas.js?v=7"></script>
+  <script src="js/socket-client.js?v=7"></script>
+  <script src="js/avatar.js?v=7"></script>
+  <script src="js/bg-3d.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 
 </body>
 </html>

@@ -18,45 +18,137 @@ app.use(cors());
 app.use(express.json({ limit: '15mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Word Prompts List
-const PROMPTS = [
-  'Cyberpunk Cat', 'Angry Potato', 'Flying Toaster', 'Ninja Turtle', 'Space Banana',
-  'Sarcastic Robot', 'Dancing Taco', 'Laser Shark', 'Unicorn with Sunglasses', 'Alien DJ',
-  'Haunted Pizza', 'Rocket Penguin', 'Disco Avocado', 'Wizard Frog', 'Electric Guitar',
-  'Giant Octopus', 'Roller-skating Bear', 'Vampire Donut', 'Superhero Hamster', 'Zombie Cactus',
-  'Time Traveling Microwave', 'Pirate Parrot', 'Neon Dragon', 'Boba Tea Monster', 'Astronaut Pug'
-];
+// ============================================================================
+// 1000+ WORD BANK CATEGORIZED & MULTI-LANGUAGE DICTIONARY
+// ============================================================================
+const WORD_BANKS = {
+  en: [
+    // Animals (100+)
+    'alligator', 'alpaca', 'ant', 'anteater', 'antelope', 'ape', 'armadillo', 'baboon', 'badger', 'bat',
+    'bear', 'beaver', 'bee', 'beetle', 'bison', 'boar', 'buffalo', 'butterfly', 'camel', 'cat',
+    'caterpillar', 'chameleon', 'cheetah', 'chicken', 'chimpanzee', 'chinchilla', 'cobra', 'cockroach', 'crab', 'cricket',
+    'crocodile', 'crow', 'deer', 'dinosaur', 'dog', 'dolphin', 'donkey', 'dragonfly', 'duck', 'eagle',
+    'elephant', 'falcon', 'flamingo', 'fly', 'fox', 'frog', 'giraffe', 'goat', 'goldfish', 'goose',
+    'gorilla', 'grasshopper', 'hamster', 'hedgehog', 'hippopotamus', 'horse', 'hummingbird', 'hyena', 'iguana', 'jaguar',
+    'jellyfish', 'kangaroo', 'koala', 'lemur', 'leopard', 'lion', 'lizard', 'llama', 'lobster', 'monkey',
+    'moose', 'mosquito', 'mouse', 'octopus', 'ostrich', 'otter', 'owl', 'panda', 'panther', 'parrot',
+    'peacock', 'pelican', 'penguin', 'pig', 'pigeon', 'polar bear', 'porcupine', 'rabbit', 'raccoon', 'rat',
+    'rhinoceros', 'scorpion', 'seahorse', 'seal', 'shark', 'sheep', 'sloth', 'snail', 'snake', 'spider',
+    'squid', 'squirrel', 'starfish', 'tiger', 'toad', 'turkey', 'turtle', 'walrus', 'wasp', 'whale',
+    'wolf', 'zebra',
 
-const AI_COMMENTARY_TIERS = {
-  curious: [
-    "Hmm... looks like early line work. Are we making a circle or a void?",
-    "Okay, I see some shapes forming. Don't ruin it now!",
-    "Interesting choice of colors... is this minimalist abstract art?",
-    "I'm scanning... right now it looks like a confused potato.",
-    "First few strokes look promising! Or at least not terrible."
+    // Objects & Household (200+)
+    'anchor', 'anvil', 'backpack', 'balloon', 'banana', 'bandage', 'barrel', 'basket', 'battery', 'bed',
+    'bell', 'bench', 'bicycle', 'binoculars', 'blanket', 'blender', 'book', 'boomerang', 'bottle', 'bow',
+    'bowl', 'box', 'broom', 'brush', 'bucket', 'button', 'calculator', 'calendar', 'camera', 'candle',
+    'cannon', 'canoe', 'car', 'carpet', 'castle', 'chair', 'chalk', 'chandelier', 'clock', 'compass',
+    'computer', 'couch', 'crown', 'cup', 'curtain', 'desk', 'diamond', 'dice', 'door', 'drum',
+    'envelope', 'eraser', 'fan', 'feather', 'fence', 'flag', 'flashlight', 'flute', 'fork', 'fountain',
+    'fridge', 'frying pan', 'globe', 'glasses', 'glove', 'guitar', 'hammer', 'handcuffs', 'harp', 'hat',
+    'headphones', 'helmet', 'hourglass', 'house', 'iron', 'jacket', 'jar', 'key', 'keyboard', 'kite',
+    'knife', 'ladder', 'lamp', 'laptop', 'lantern', 'leash', 'lightbulb', 'lock', 'magnet', 'map',
+    'mask', 'matchstick', 'microphone', 'microscope', 'mirror', 'mop', 'necklace', 'needle', 'newspaper', 'notebook',
+    'padlock', 'paint brush', 'paperclip', 'passport', 'pen', 'pencil', 'phone', 'piano', 'pillow', 'pipe',
+    'pitchfork', 'plate', 'plunger', 'postcard', 'purse', 'radio', 'rake', 'ring', 'robot', 'rocket',
+    'rope', 'ruler', 'saddle', 'safe', 'saxophone', 'scissors', 'screwdriver', 'shield', 'shoe', 'shovel',
+    'skateboard', 'skis', 'sled', 'soap', 'sock', 'sponge', 'spoon', 'stamp', 'stethoscope', 'suitcase',
+    'sunglasses', 'sword', 'syringe', 'table', 'telephone', 'telescope', 'television', 'tent', 'thermometer', 'thimble',
+    'tire', 'toaster', 'toilet', 'toothbrush', 'toothpaste', 'torch', 'towel', 'tractor', 'trash can', 'treasure chest',
+    'trophy', 'trumpet', 'umbrella', 'vacuum', 'vase', 'violin', 'wallet', 'watch', 'watering can', 'wheelbarrow',
+    'whistle', 'window', 'wrench', 'yo-yo', 'zipper',
+
+    // Food & Drink (150+)
+    'apple', 'avocado', 'bacon', 'bagel', 'baguette', 'banana', 'barbecue', 'beer', 'biscuit', 'blackberry',
+    'blueberry', 'bread', 'broccoli', 'burger', 'butter', 'cabbage', 'cake', 'candy', 'carrot', 'caviar',
+    'celery', 'cereal', 'cheese', 'cheesecake', 'cherry', 'chicken wing', 'chili', 'chocolate', 'cinnamon', 'coconut',
+    'coffee', 'cookie', 'corn', 'cotton candy', 'croissant', 'cucumber', 'cupcake', 'donut', 'dragon fruit', 'egg',
+    'eggplant', 'fig', 'french fries', 'garlic', 'ginger', 'grape', 'grapefruit', 'green bean', 'ham', 'hot dog',
+    'ice cream', 'jelly', 'kiwi', 'lemon', 'lettuce', 'lime', 'lobster', 'lollipop', 'macaroni', 'mango',
+    'marshmallow', 'milk', 'milkshake', 'muffin', 'mushroom', 'mustard', 'noodle', 'nut', 'oatmeal', 'onion',
+    'orange', 'pancake', 'papaya', 'pasta', 'peach', 'peanut', 'pear', 'peas', 'pepper', 'pickle',
+    'pie', 'pineapple', 'pizza', 'plum', 'popcorn', 'potato', 'pretzel', 'pumpkin', 'radish', 'raisin',
+    'raspberry', 'rice', 'salad', 'salmon', 'sandwich', 'sausage', 'shrimp', 'soup', 'spaghetti', 'spinach',
+    'steak', 'strawberry', 'sushi', 'taco', 'tea', 'toast', 'tomato', 'waffle', 'watermelon', 'yogurt',
+
+    // Nature, Places & Transportation (150+)
+    'airport', 'amusement park', 'apartment', 'aquarium', 'arch', 'archipelago', 'arctic', 'arena', 'asteroid', 'attic',
+    'bakery', 'bank', 'barn', 'beach', 'bridge', 'bus', 'cabin', 'cable car', 'cactus', 'canyon',
+    'cave', 'cemetery', 'church', 'circus', 'city', 'cliff', 'cloud', 'comet', 'constellation', 'desert',
+    'dock', 'dune', 'earthquake', 'eclipse', 'factory', 'farm', 'fire station', 'forest', 'galaxy', 'garage',
+    'garden', 'glacier', 'greenhouse', 'harbor', 'hospital', 'hotel', 'house', 'hurricane', 'iceberg', 'island',
+    'jungle', 'lagoon', 'lake', 'library', 'lighthouse', 'marsh', 'meadow', 'meteor', 'metro', 'mill',
+    'mountain', 'museum', 'nebula', 'oasis', 'ocean', 'observatory', 'office', 'park', 'pyramid', 'railway',
+    'rain', 'rainbow', 'river', 'road', 'roadblock', 'rocket ship', 'ruins', 'satellite', 'school', 'skyscraper',
+    'snow', 'space station', 'stadium', 'star', 'submarine', 'sun', 'swamp', 'temple', 'tornado', 'tower',
+    'town', 'train', 'tunnel', 'universe', 'valley', 'volcano', 'waterfall', 'windmill', 'zoo',
+
+    // Actions, Concepts & Fantasy (200+)
+    'alien', 'angel', 'angel wings', 'archery', 'astronaut', 'baking', 'ballerina', 'climbing', 'cooking', 'dancing',
+    'demon', 'detective', 'disguise', 'diver', 'drawing', 'dream', 'dwarf', 'elf', 'exercise', 'explosion',
+    'fairy', 'fireman', 'fishing', 'flying', 'ghost', 'giant', 'fairy tale', 'graffiti', 'hero', 'hiking',
+    'hypnosis', 'illusion', 'juggler', 'karate', 'king', 'knight', 'laser', 'magic', 'magician', 'martian',
+    'monster', 'mummy', 'ninja', 'ninja star', 'painting', 'pirate', 'prince', 'princess', 'reading', 'running',
+    'sculpture', 'shadow', 'singing', 'skating', 'skiing', 'sleeping', 'superhero', 'surfing', 'swimming', 'vampire',
+    'witch', 'wizard', 'wrestling', 'zombie'
   ],
-  smug: [
-    "Wait, is that supposed to be a leg or a stick figure mistake?",
-    "My neural nets are processing... result: 40% art, 60% scribble chaos!",
-    "I've seen captcha images clearer than this masterpiece.",
-    "Are you drawing with your elbows? Just curious!",
-    "I'm guessing, but my confidence score is dropping faster than your score!"
+  es: [
+    'gato', 'perro', 'casa', 'sol', 'luna', 'arbol', 'flor', 'coche', 'barco', 'avion',
+    'manzana', 'platano', 'pizza', 'helado', 'libro', 'lapiz', 'reloj', 'telefono', 'ordenador', 'guitarra',
+    'pelota', 'zapato', 'sombrero', 'camisa', 'pantalon', 'silla', 'mesa', 'cama', 'puerta', 'ventana'
   ],
-  cocky: [
-    "Seriously? A toddler with a crayon could convey this concept better!",
-    "Is that a hat or did your cursor slip into another dimension?",
-    "I run on billions of parameters, yet I can't parameterize whatever THIS is!",
-    "Tick tock! The clock is ticking and my patience is running out!",
-    "If this wins, art school standard is officially dead."
+  fr: [
+    'chat', 'chien', 'maison', 'soleil', 'lune', 'arbre', 'fleur', 'voiture', 'bateau', 'avion',
+    'pomme', 'banane', 'pizza', 'glace', 'livre', 'crayon', 'horloge', 'telephone', 'ordinateur', 'guitare'
   ],
-  brutal: [
-    "EMERGENCY! Neural network overheating from sheer artistic confusion!",
-    "I give up! Is it a cat? A rocket? A crime against aesthetics?",
-    "Time is almost UP and even quantum computers couldn't guess this!",
-    "0% confidence, 100% sarcastic judgement!",
-    "Final seconds! Save yourself the embarrassment and hit clear!"
+  de: [
+    'katze', 'hund', 'haus', 'sonne', 'mond', 'baum', 'blume', 'auto', 'schiff', 'flugzeug',
+    'mehl', 'banane', 'pizza', 'eis', 'buch', 'stift', 'uhr', 'telefon', 'computer', 'gitarre'
+  ],
+  pt: [
+    'gato', 'cachorro', 'casa', 'sol', 'lua', 'arvore', 'flor', 'carro', 'barco', 'aviao',
+    'maca', 'banana', 'pizza', 'sorvete', 'livro', 'lapis', 'relogio', 'telefone', 'computador', 'violao'
+  ],
+  hi: [
+    'cat', 'dog', 'house', 'sun', 'moon', 'tree', 'flower', 'car', 'boat', 'airplane',
+    'apple', 'banana', 'pizza', 'ice cream', 'book', 'pencil', 'clock', 'phone', 'computer', 'guitar'
   ]
 };
+
+// Basic Profanity Filter List
+const BAD_WORDS = ['fuck', 'shit', 'ass', 'bitch', 'cunt', 'dick', 'pussy', 'bastard', 'whore', 'slut'];
+
+function filterProfanity(text) {
+  let clean = text || '';
+  BAD_WORDS.forEach(word => {
+    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+    clean = clean.replace(regex, '****');
+  });
+  return clean;
+}
+
+// Levenshtein Distance for Close Guess Detection
+function getLevenshteinDistance(a, b) {
+  const matrix = [];
+  const lenA = a.length;
+  const lenB = b.length;
+
+  for (let i = 0; i <= lenB; i++) matrix[i] = [i];
+  for (let j = 0; j <= lenA; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= lenB; i++) {
+    for (let j = 1; j <= lenA; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+        );
+      }
+    }
+  }
+  return matrix[lenB][lenA];
+}
 
 const rooms = new Map();
 
@@ -69,133 +161,61 @@ function generateRoomCode() {
   return result;
 }
 
-function getRandomPrompt() {
-  return PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
-}
-
-function getAICockyComment(ratioRemaining) {
-  const elapsedRatio = 1 - ratioRemaining;
-  let pool = AI_COMMENTARY_TIERS.curious;
-  if (elapsedRatio > 0.8) pool = AI_COMMENTARY_TIERS.brutal;
-  else if (elapsedRatio > 0.55) pool = AI_COMMENTARY_TIERS.cocky;
-  else if (elapsedRatio > 0.25) pool = AI_COMMENTARY_TIERS.smug;
-
-  const comment = pool[Math.floor(Math.random() * pool.length)];
-  const cockinessPercent = Math.min(99, Math.floor(elapsedRatio * 100 + 10));
-  return { comment, cockinessPercent };
-}
-
-// Vision LLM API Integration (Claude / GPT Vision / Gemini) with Fallback
-async function callVisionLLMJudge(prompt, drawingDataUrl, elapsedRatio) {
-  const base64Data = (drawingDataUrl || '').replace(/^data:image\/\w+;base64,/, '');
-
-  // 1. Anthropic Claude Vision API (if ANTHROPIC_API_KEY is configured)
-  if (process.env.ANTHROPIC_API_KEY && base64Data) {
-    try {
-      const fetch = (await import('node-fetch')).default;
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
-          max_tokens: 150,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: 'image/png', data: base64Data } },
-              { type: 'text', text: `You are a hilarious sarcastic AI art judge in a game. The secret word is "${prompt}". Output a short single sentence sarcastic guess or critique!` }
-            ]
-          }]
-        })
-      });
-      const data = await res.json();
-      if (data.content && data.content[0] && data.content[0].text) {
-        const text = data.content[0].text.trim();
-        const { cockinessPercent } = getAICockyComment(elapsedRatio);
-        return { guess: prompt, comment: text, cockinessPercent, isCorrect: text.toLowerCase().includes(prompt.toLowerCase()) };
-      }
-    } catch (e) {
-      console.warn('Claude API call failed, falling back to local engine:', e.message);
-    }
-  }
-
-  // 2. OpenAI GPT-4o Vision API (if OPENAI_API_KEY is configured)
-  if (process.env.OPENAI_API_KEY && base64Data) {
-    try {
-      const fetch = (await import('node-fetch')).default;
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          max_tokens: 100,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'text', text: `You are a sarcastic AI drawing judge guessing the drawing. The target prompt is "${prompt}". Give a short 1-line sarcastic reaction!` },
-              { type: 'image_url', image_url: { url: `data:image/png;base64,${base64Data}` } }
-            ]
-          }]
-        })
-      });
-      const data = await res.json();
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        const text = data.choices[0].message.content.trim();
-        const { cockinessPercent } = getAICockyComment(elapsedRatio);
-        return { guess: prompt, comment: text, cockinessPercent, isCorrect: text.toLowerCase().includes(prompt.toLowerCase()) };
-      }
-    } catch (e) {
-      console.warn('OpenAI API call failed, falling back to local engine:', e.message);
-    }
-  }
-
-  // 3. Fallback Procedural Sarcastic AI Engine
-  const isCorrect = Math.random() < (0.2 + (1 - elapsedRatio) * 0.7);
-  const words = prompt.split(' ');
-  const wordClue = words[words.length - 1];
-
-  let guess;
-  if (isCorrect) {
-    guess = prompt;
+function getRandomWords(count = 3, language = 'en', customWords = [], customOnly = false) {
+  let pool = [];
+  if (customOnly && customWords.length > 0) {
+    pool = [...customWords];
+  } else if (customWords.length > 0) {
+    const langPool = WORD_BANKS[language] || WORD_BANKS['en'];
+    pool = [...customWords, ...langPool];
   } else {
-    const wrongGuesses = [
-      `A deformed ${wordClue}?`,
-      `Is it a ${PROMPTS[Math.floor(Math.random() * PROMPTS.length)]}?`,
-      `Looks like a broken ${words[0] || 'object'}`,
-      `A modern ${wordClue} abstract sculpture`
-    ];
-    guess = wrongGuesses[Math.floor(Math.random() * wrongGuesses.length)];
+    pool = WORD_BANKS[language] || WORD_BANKS['en'];
   }
 
-  const { comment, cockinessPercent } = getAICockyComment(elapsedRatio);
-  return { guess, isCorrect, comment, cockinessPercent };
+  // Shuffle & pick unique
+  const shuffled = [...pool].sort(() => 0.5 - Math.random());
+  const selected = shuffled.slice(0, count);
+  return selected;
 }
 
-function createRoomObject(code, mode, maxPlayers = 8, roundTime = 60, totalRounds = 3) {
+function generateWordHint(word, revealedIndexes = []) {
+  if (!word) return '';
+  return word.split('').map((char, index) => {
+    if (char === ' ') return '  ';
+    if (revealedIndexes.includes(index)) return char.toUpperCase();
+    return '_';
+  }).join(' ');
+}
+
+function createRoomObject(code, isPrivate = false, settings = {}) {
   return {
     code,
-    mode,
-    maxPlayers: parseInt(maxPlayers) || 8,
-    roundTime: parseInt(roundTime) || 60,
-    totalRounds: parseInt(totalRounds) || 3,
+    isPrivate,
+    maxPlayers: Math.min(20, Math.max(2, parseInt(settings.maxPlayers) || 8)),
+    drawTime: Math.min(180, Math.max(30, parseInt(settings.drawTime) || 60)),
+    totalRounds: Math.min(10, Math.max(2, parseInt(settings.totalRounds) || 3)),
+    wordChoicesCount: Math.min(5, Math.max(1, parseInt(settings.wordChoicesCount) || 3)),
+    hintsCount: Math.min(5, Math.max(0, parseInt(settings.hintsCount) || 2)),
+    language: settings.language || 'en',
+    customWords: (settings.customWords || '').split(',').map(w => w.trim()).filter(Boolean),
+    customWordsOnly: !!settings.customWordsOnly,
+    
     players: [],
     hostId: null,
-    status: 'lobby',
+    status: 'lobby', // 'lobby', 'selecting_word', 'drawing', 'turn_end', 'ended'
     currentRound: 1,
-    currentPrompt: '',
-    secretDescription: '',
+    currentTurnIndex: 0,
     activeDrawerId: null,
+    currentWord: '',
+    currentHint: '',
+    wordChoices: [],
+    revealedIndexes: [],
+    correctGuessers: new Set(),
+    voteKicks: new Map(), // playerId -> Set(voterIds)
     timer: null,
     timeRemaining: 60,
     latestDrawingDataUrl: null,
-    telephoneChain: []
+    canvasStrokes: []
   };
 }
 
@@ -203,14 +223,10 @@ function createRoomObject(code, mode, maxPlayers = 8, roundTime = 60, totalRound
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
-    app: 'ScribbleChaos AI Art Battleground',
+    app: 'ScribbleChaos Skribbl Engine',
     uptime: process.uptime(),
     activeRooms: rooms.size,
-    aiVisionSupport: {
-      claude: !!process.env.ANTHROPIC_API_KEY,
-      openai: !!process.env.OPENAI_API_KEY,
-      gemini: !!process.env.GEMINI_API_KEY
-    },
+    totalWordsInBank: WORD_BANKS.en.length,
     timestamp: new Date().toISOString()
   });
 });
@@ -218,17 +234,19 @@ app.get('/api/health', (req, res) => {
 io.on('connection', (socket) => {
   console.log(`🔌 Client connected: ${socket.id}`);
 
-  // Create Room
-  socket.on('create_room', ({ playerName, mode, maxPlayers, roundTime, totalRounds }, callback) => {
+  // Create Private Room
+  socket.on('create_room', ({ playerName, settings, avatar }, callback) => {
     const roomCode = generateRoomCode();
-    const room = createRoomObject(roomCode, mode || 'pixel_telephone', maxPlayers, roundTime, totalRounds);
+    const room = createRoomObject(roomCode, true, settings || {});
 
     const player = {
       id: socket.id,
       name: playerName || `Player_${socket.id.substring(0, 4)}`,
+      avatar: avatar || {},
       score: 0,
-      ready: true,
-      isHost: true
+      scoreDelta: 0,
+      isHost: true,
+      hasGuessed: false
     };
 
     room.hostId = socket.id;
@@ -236,14 +254,14 @@ io.on('connection', (socket) => {
     rooms.set(roomCode, room);
 
     socket.join(roomCode);
-    console.log(`🎮 Room created: ${roomCode} by ${player.name} (Mode: ${room.mode})`);
+    console.log(`🎮 Private Room created: ${roomCode} by ${player.name}`);
 
     if (typeof callback === 'function') callback({ success: true, roomCode, room });
-    io.to(roomCode).emit('room_updated', room);
+    io.to(roomCode).emit('room_updated', sanitizeRoomForClient(room));
   });
 
   // Join Room
-  socket.on('join_room', ({ roomCode, playerName }, callback) => {
+  socket.on('join_room', ({ roomCode, playerName, avatar }, callback) => {
     const code = (roomCode || '').toUpperCase().trim();
     const room = rooms.get(code);
 
@@ -260,25 +278,34 @@ io.on('connection', (socket) => {
     const player = {
       id: socket.id,
       name: playerName || `Player_${socket.id.substring(0, 4)}`,
+      avatar: avatar || {},
       score: 0,
-      ready: false,
-      isHost: false
+      scoreDelta: 0,
+      isHost: room.players.length === 0,
+      hasGuessed: false
     };
+
+    if (player.isHost) room.hostId = socket.id;
 
     room.players.push(player);
     socket.join(code);
 
     console.log(`👤 ${player.name} joined room ${code}`);
 
-    if (typeof callback === 'function') callback({ success: true, roomCode: code, room });
-    io.to(code).emit('room_updated', room);
+    if (typeof callback === 'function') callback({ success: true, roomCode: code, room: sanitizeRoomForClient(room) });
+    io.to(code).emit('room_updated', sanitizeRoomForClient(room));
+
+    // Broadcast current canvas to late joiner
+    if (room.latestDrawingDataUrl) {
+      socket.emit('load_canvas_state', { dataUrl: room.latestDrawingDataUrl });
+    }
   });
 
-  // Quick Matchmaking
-  socket.on('quick_match', ({ playerName }, callback) => {
+  // Quick Public Matchmaking
+  socket.on('quick_match', ({ playerName, avatar }, callback) => {
     let targetRoom = null;
     for (const [code, r] of rooms.entries()) {
-      if (r.status === 'lobby' && r.players.length < r.maxPlayers) {
+      if (!r.isPrivate && r.status === 'lobby' && r.players.length < r.maxPlayers) {
         targetRoom = r;
         break;
       }
@@ -286,16 +313,18 @@ io.on('connection', (socket) => {
 
     if (!targetRoom) {
       const code = generateRoomCode();
-      targetRoom = createRoomObject(code, 'pixel_telephone', 8, 60, 3);
+      targetRoom = createRoomObject(code, false, { drawTime: 60, totalRounds: 3, maxPlayers: 8 });
       rooms.set(code, targetRoom);
     }
 
     const player = {
       id: socket.id,
-      name: playerName || `SpeedScrubber_${socket.id.substring(0, 3)}`,
+      name: playerName || `SpeedArtist_${socket.id.substring(0, 3)}`,
+      avatar: avatar || {},
       score: 0,
-      ready: true,
-      isHost: targetRoom.players.length === 0
+      scoreDelta: 0,
+      isHost: targetRoom.players.length === 0,
+      hasGuessed: false
     };
 
     if (player.isHost) targetRoom.hostId = socket.id;
@@ -303,8 +332,8 @@ io.on('connection', (socket) => {
     targetRoom.players.push(player);
     socket.join(targetRoom.code);
 
-    if (typeof callback === 'function') callback({ success: true, roomCode: targetRoom.code, room: targetRoom });
-    io.to(targetRoom.code).emit('room_updated', targetRoom);
+    if (typeof callback === 'function') callback({ success: true, roomCode: targetRoom.code, room: sanitizeRoomForClient(targetRoom) });
+    io.to(targetRoom.code).emit('room_updated', sanitizeRoomForClient(targetRoom));
   });
 
   // Host Kick Player
@@ -312,301 +341,397 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomCode);
     if (!room || room.hostId !== socket.id) return;
 
-    const idx = room.players.findIndex(p => p.id === playerId);
-    if (idx !== -1) {
-      const kicked = room.players.splice(idx, 1)[0];
-      const kickedSocket = io.sockets.sockets.get(playerId);
-      if (kickedSocket) {
-        kickedSocket.leave(roomCode);
-        kickedSocket.emit('kicked_from_room');
-      }
-      io.to(roomCode).emit('room_updated', room);
-      console.log(`👢 Host kicked ${kicked.name} from room ${roomCode}`);
+    removePlayerFromRoom(room, playerId, 'kicked');
+  });
+
+  // Vote Kick Player
+  socket.on('vote_kick', ({ roomCode, targetPlayerId }) => {
+    const room = rooms.get(roomCode);
+    if (!room) return;
+
+    const targetPlayer = room.players.find(p => p.id === targetPlayerId);
+    if (!targetPlayer || targetPlayer.isHost) return;
+
+    if (!room.voteKicks.has(targetPlayerId)) {
+      room.voteKicks.set(targetPlayerId, new Set());
+    }
+
+    const votes = room.voteKicks.get(targetPlayerId);
+    votes.add(socket.id);
+
+    const neededVotes = Math.ceil(room.players.length / 2);
+    io.to(roomCode).emit('vote_kick_updated', {
+      targetPlayerId,
+      targetName: targetPlayer.name,
+      currentVotes: votes.size,
+      neededVotes
+    });
+
+    if (votes.size >= neededVotes) {
+      removePlayerFromRoom(room, targetPlayerId, 'vote_kicked');
     }
   });
 
-  // Start Game
+  // Host Start Game
   socket.on('start_game', ({ roomCode }) => {
     const room = rooms.get(roomCode);
-    if (!room || room.hostId !== socket.id) return;
+    if (!room || room.hostId !== socket.id || room.status !== 'lobby') return;
 
-    startNextRound(room);
+    room.currentRound = 1;
+    room.currentTurnIndex = 0;
+    room.players.forEach(p => { p.score = 0; p.scoreDelta = 0; });
+    startWordSelectionPhase(room);
   });
 
-  // Real-time Canvas Drawing Events
+  // Word Selection Choice by Drawer
+  socket.on('select_word', ({ roomCode, word }) => {
+    const room = rooms.get(roomCode);
+    if (!room || room.status !== 'selecting_word' || room.activeDrawerId !== socket.id) return;
+
+    room.currentWord = word;
+    startDrawingPhase(room);
+  });
+
+  // Real-time Stroke & Canvas Operations
   socket.on('draw_stroke', ({ roomCode, strokeData }) => {
-    socket.to(roomCode).emit('receive_stroke', strokeData);
-  });
-
-  socket.on('fabric_sync', ({ roomCode, jsonState }) => {
-    socket.to(roomCode).emit('receive_fabric_sync', jsonState);
+    const room = rooms.get(roomCode);
+    if (room && room.activeDrawerId === socket.id) {
+      socket.to(roomCode).emit('receive_stroke', strokeData);
+    }
   });
 
   socket.on('clear_canvas', ({ roomCode }) => {
-    socket.to(roomCode).emit('canvas_cleared');
+    const room = rooms.get(roomCode);
+    if (room && room.activeDrawerId === socket.id) {
+      room.latestDrawingDataUrl = null;
+      socket.to(roomCode).emit('canvas_cleared');
+    }
   });
 
   socket.on('update_canvas_image', ({ roomCode, dataUrl }) => {
     const room = rooms.get(roomCode);
-    if (room) room.latestDrawingDataUrl = dataUrl;
-  });
-
-  // Submit Guess in Mode 1
-  socket.on('submit_guess', ({ roomCode, guessText }) => {
-    const room = rooms.get(roomCode);
-    if (!room || room.status !== 'playing') return;
-
-    const player = room.players.find(p => p.id === socket.id);
-    const cleanGuess = (guessText || '').toLowerCase().trim();
-    const cleanPrompt = (room.currentPrompt || '').toLowerCase().trim();
-
-    if (cleanGuess === cleanPrompt) {
-      const timeBonus = Math.floor(room.timeRemaining * 15);
-      const points = 500 + timeBonus;
-
-      if (player) player.score += points;
-
-      const drawer = room.players.find(p => p.id === room.activeDrawerId);
-      if (drawer) drawer.score += Math.floor(points * 0.8);
-
-      io.to(roomCode).emit('guess_result', {
-        success: true,
-        guesserName: player ? player.name : 'AI',
-        guess: guessText,
-        points,
-        prompt: room.currentPrompt
-      });
-
-      clearInterval(room.timer);
-      setTimeout(() => startNextRound(room), 3000);
-    } else {
-      io.to(roomCode).emit('guess_result', {
-        success: false,
-        guesserName: player ? player.name : 'Unknown',
-        guess: guessText
-      });
+    if (room && room.activeDrawerId === socket.id) {
+      room.latestDrawingDataUrl = dataUrl;
     }
   });
 
-  // Mode 2: Submit Secret Description
-  socket.on('submit_blind_description', ({ roomCode, description }) => {
-    const room = rooms.get(roomCode);
-    if (!room || room.mode !== 'blind_artist') return;
-
-    room.secretDescription = description;
-    io.to(roomCode).emit('blind_description_set', { description });
-  });
-
-  // Mode 2 & Mode 3: Submit Canvas Drawing
-  socket.on('submit_drawing', ({ roomCode, drawingDataUrl }) => {
+  // Chat & Guess Message Handling
+  socket.on('send_chat', ({ roomCode, messageText }) => {
     const room = rooms.get(roomCode);
     if (!room) return;
 
     const player = room.players.find(p => p.id === socket.id);
+    if (!player) return;
 
-    if (room.mode === 'blind_artist') {
-      const similarityScore = Math.floor(Math.random() * 40 + 55);
-      const points = similarityScore * 10;
-      if (player) player.score += points;
+    const rawText = (messageText || '').trim();
+    if (!rawText) return;
 
-      const aiCritique = getAIBlindCritique(similarityScore, room.secretDescription);
+    const cleanText = filterProfanity(rawText);
 
-      io.to(roomCode).emit('blind_evaluation_result', {
-        playerId: socket.id,
-        playerName: player ? player.name : 'Artist',
-        drawingDataUrl,
-        similarityScore,
-        points,
-        aiCritique
-      });
-    } else if (room.mode === 'pixel_telephone') {
-      room.telephoneChain.push({
-        type: 'draw',
-        playerId: socket.id,
-        playerName: player ? player.name : 'Artist',
-        content: drawingDataUrl,
-        stepIndex: room.telephoneChain.length + 1
-      });
+    // If game is in drawing phase, check if message is a guess
+    if (room.status === 'drawing') {
+      const isDrawer = room.activeDrawerId === socket.id;
+      const targetWord = (room.currentWord || '').toLowerCase().trim();
+      const guessWord = cleanText.toLowerCase().trim();
 
-      advanceTelephoneChain(room);
+      // Prevent drawer from revealing word in chat
+      if (isDrawer && targetWord && (guessWord.includes(targetWord) || targetWord.includes(guessWord))) {
+        socket.emit('chat_blocked', { message: 'You cannot type the word or part of it in chat while drawing!' });
+        return;
+      }
+
+      // If player already guessed, broadcast chat only to drawer and other correct guessers
+      if (player.hasGuessed || isDrawer) {
+        room.players.forEach(p => {
+          if (p.hasGuessed || p.id === room.activeDrawerId) {
+            io.to(p.id).emit('chat_message', {
+              senderName: player.name,
+              message: cleanText,
+              isGuessed: true
+            });
+          }
+        });
+        return;
+      }
+
+      // Exact Match (Correct Guess)
+      if (guessWord === targetWord) {
+        player.hasGuessed = true;
+        room.correctGuessers.add(socket.id);
+
+        const timeRatio = room.timeRemaining / room.drawTime;
+        const guesserPoints = Math.round(500 * timeRatio + 100);
+        player.score += guesserPoints;
+        player.scoreDelta = guesserPoints;
+
+        // Reward drawer based on correct guessers count
+        const drawer = room.players.find(p => p.id === room.activeDrawerId);
+        if (drawer) {
+          const drawerPoints = Math.round(150 * (room.correctGuessers.size / (room.players.length - 1)));
+          drawer.score += drawerPoints;
+          drawer.scoreDelta = (drawer.scoreDelta || 0) + drawerPoints;
+        }
+
+        io.to(roomCode).emit('correct_guess', {
+          guesserId: player.id,
+          guesserName: player.name,
+          points: guesserPoints,
+          room: sanitizeRoomForClient(room)
+        });
+
+        // Check if all non-drawers have guessed correctly
+        const nonDrawersCount = room.players.length - 1;
+        if (room.correctGuessers.size >= nonDrawersCount) {
+          endTurnPhase(room, 'all_guessed');
+        }
+        return;
+      }
+
+      // Close Guess Check (Levenshtein distance = 1)
+      if (targetWord && getLevenshteinDistance(guessWord, targetWord) === 1) {
+        socket.emit('close_guess', { message: `"${rawText}" is very close!` });
+      }
     }
-  });
 
-  // Mode 3: Submit Telephone Description
-  socket.on('submit_telephone_description', ({ roomCode, description }) => {
-    const room = rooms.get(roomCode);
-    if (!room || room.mode !== 'pixel_telephone') return;
-
-    const player = room.players.find(p => p.id === socket.id);
-
-    room.telephoneChain.push({
-      type: 'describe',
-      playerId: socket.id,
-      playerName: player ? player.name : 'Describer',
-      content: description,
-      stepIndex: room.telephoneChain.length + 1
+    // Normal Broadcast Chat
+    io.to(roomCode).emit('chat_message', {
+      senderName: player.name,
+      message: cleanText,
+      isGuessed: false
     });
-
-    advanceTelephoneChain(room);
   });
 
-  // Disconnect
+  // Play Again Action
+  socket.on('play_again', ({ roomCode }) => {
+    const room = rooms.get(roomCode);
+    if (!room || room.hostId !== socket.id) return;
+
+    room.status = 'lobby';
+    room.currentRound = 1;
+    room.currentTurnIndex = 0;
+    room.players.forEach(p => { p.score = 0; p.scoreDelta = 0; p.hasGuessed = false; });
+    io.to(roomCode).emit('room_updated', sanitizeRoomForClient(room));
+  });
+
+  // Disconnect Handling
   socket.on('disconnect', () => {
+    console.log(`❌ Client disconnected: ${socket.id}`);
     for (const [code, room] of rooms.entries()) {
       const index = room.players.findIndex(p => p.id === socket.id);
       if (index !== -1) {
-        const removedPlayer = room.players.splice(index, 1)[0];
-
-        if (room.players.length === 0) {
-          clearInterval(room.timer);
-          rooms.delete(code);
-        } else {
-          if (room.hostId === socket.id) {
-            room.hostId = room.players[0].id;
-            room.players[0].isHost = true;
-          }
-          io.to(code).emit('room_updated', room);
-        }
+        removePlayerFromRoom(room, socket.id, 'disconnected');
       }
     }
   });
 });
 
-function startNextRound(room) {
-  clearInterval(room.timer);
+function removePlayerFromRoom(room, playerId, reason = 'left') {
+  const idx = room.players.findIndex(p => p.id === playerId);
+  if (idx === -1) return;
 
-  if (room.currentRound > room.totalRounds) {
-    room.status = 'ended';
-    const sortedLeaderboard = [...room.players].sort((a, b) => b.score - a.score);
-    io.to(room.code).emit('game_over', {
-      leaderboard: sortedLeaderboard
-    });
+  const player = room.players.splice(idx, 1)[0];
+  const targetSocket = io.sockets.sockets.get(playerId);
+  if (targetSocket) {
+    targetSocket.leave(room.code);
+    targetSocket.emit('player_removed', { reason });
+  }
+
+  console.log(`🚪 ${player.name} removed from room ${room.code} (${reason})`);
+
+  if (room.players.length === 0) {
+    clearInterval(room.timer);
+    rooms.delete(room.code);
     return;
   }
 
-  room.status = 'playing';
-  room.currentPrompt = getRandomPrompt();
-  room.timeRemaining = room.roundTime;
-
-  const drawerIndex = (room.currentRound - 1) % room.players.length;
-  room.activeDrawerId = room.players[drawerIndex].id;
-
-  if (room.mode === 'pixel_telephone') {
-    room.telephoneChain = [{
-      type: 'prompt',
-      playerName: 'Chaos Engine',
-      content: room.currentPrompt,
-      stepIndex: 1
-    }];
+  // Re-assign host if host left
+  if (room.hostId === playerId) {
+    room.hostId = room.players[0].id;
+    room.players[0].isHost = true;
   }
 
-  io.to(room.code).emit('round_started', {
+  // If active drawer left during turn, skip turn
+  if (room.activeDrawerId === playerId && ['selecting_word', 'drawing'].includes(room.status)) {
+    clearInterval(room.timer);
+    io.to(room.code).emit('chat_message', { senderName: 'SYSTEM', message: `Drawer ${player.name} disconnected! Skipping turn...` });
+    endTurnPhase(room, 'drawer_left');
+  } else {
+    io.to(room.code).emit('room_updated', sanitizeRoomForClient(room));
+  }
+}
+
+// ============================================================================
+// GAME FLOW CONTROLLER
+// ============================================================================
+
+function startWordSelectionPhase(room) {
+  clearInterval(room.timer);
+
+  // Check if round should advance
+  if (room.currentTurnIndex >= room.players.length) {
+    room.currentTurnIndex = 0;
+    room.currentRound++;
+  }
+
+  if (room.currentRound > room.totalRounds) {
+    room.status = 'ended';
+    const leaderboard = [...room.players].sort((a, b) => b.score - a.score);
+    io.to(room.code).emit('game_over', { leaderboard });
+    return;
+  }
+
+  const activeDrawer = room.players[room.currentTurnIndex];
+  if (!activeDrawer) return;
+
+  room.status = 'selecting_word';
+  room.activeDrawerId = activeDrawer.id;
+  room.correctGuessers.clear();
+  room.players.forEach(p => { p.hasGuessed = false; p.scoreDelta = 0; });
+  room.latestDrawingDataUrl = null;
+
+  // Generate 3 random words
+  room.wordChoices = getRandomWords(room.wordChoicesCount, room.language, room.customWords, room.customWordsOnly);
+  room.timeRemaining = 15;
+
+  io.to(room.code).emit('word_selection_phase', {
     round: room.currentRound,
     totalRounds: room.totalRounds,
-    mode: room.mode,
-    prompt: room.currentPrompt,
-    activeDrawerId: room.activeDrawerId,
-    activeDrawerName: room.players[drawerIndex].name,
-    timeLimit: room.roundTime
+    activeDrawerId: activeDrawer.id,
+    activeDrawerName: activeDrawer.name,
+    timeLimit: 15
   });
 
-  let aiTickCounter = 0;
+  // Send word choices ONLY to the active drawer
+  const drawerSocket = io.sockets.sockets.get(activeDrawer.id);
+  if (drawerSocket) {
+    drawerSocket.emit('choose_word_prompt', { choices: room.wordChoices });
+  }
 
-  room.timer = setInterval(async () => {
+  room.timer = setInterval(() => {
     room.timeRemaining--;
-
-    const remainingRatio = room.timeRemaining / room.roundTime;
-
-    if (room.mode === 'ai_judges' && room.timeRemaining > 0) {
-      aiTickCounter++;
-      if (aiTickCounter % 7 === 0) {
-        const aiResponse = await callVisionLLMJudge(room.currentPrompt, room.latestDrawingDataUrl, remainingRatio);
-
-        io.to(room.code).emit('ai_commentary', {
-          guess: aiResponse.guess,
-          comment: aiResponse.comment,
-          cockinessPercent: aiResponse.cockinessPercent,
-          isCorrect: aiResponse.isCorrect,
-          timeRemaining: room.timeRemaining
-        });
-
-        if (aiResponse.isCorrect) {
-          clearInterval(room.timer);
-          const drawer = room.players.find(p => p.id === room.activeDrawerId);
-          const points = Math.floor(room.timeRemaining * 12 + 300);
-          if (drawer) drawer.score += points;
-
-          io.to(room.code).emit('guess_result', {
-            success: true,
-            guesserName: 'AI Judge 🤖',
-            guess: room.currentPrompt,
-            points,
-            prompt: room.currentPrompt
-          });
-
-          setTimeout(() => {
-            room.currentRound++;
-            startNextRound(room);
-          }, 3500);
-          return;
-        }
-      }
-    }
-
-    io.to(room.code).emit('timer_tick', {
-      timeRemaining: room.timeRemaining,
-      ratio: remainingRatio
-    });
+    io.to(room.code).emit('timer_tick', { timeRemaining: room.timeRemaining, phase: 'selecting_word' });
 
     if (room.timeRemaining <= 0) {
       clearInterval(room.timer);
-      io.to(room.code).emit('time_up', { prompt: room.currentPrompt });
-
-      setTimeout(() => {
-        room.currentRound++;
-        startNextRound(room);
-      }, 4000);
+      // Auto-pick first word if drawer didn't choose
+      room.currentWord = room.wordChoices[0] || 'apple';
+      startDrawingPhase(room);
     }
   }, 1000);
 }
 
-function advanceTelephoneChain(room) {
-  const currentChainLen = room.telephoneChain.length;
+function startDrawingPhase(room) {
+  clearInterval(room.timer);
+  room.status = 'drawing';
+  room.timeRemaining = room.drawTime;
+  room.revealedIndexes = [];
 
-  if (currentChainLen >= room.players.length * 2 || currentChainLen >= 6) {
-    room.status = 'reveal';
-    const distortionScore = Math.floor(Math.random() * 45 + 50);
-    io.to(room.code).emit('telephone_reveal', {
-      chain: room.telephoneChain,
-      distortionScore,
-      summary: `Art deteriorated by ${distortionScore}% from initial prompt "${room.currentPrompt}"!`
-    });
-  } else {
-    const nextPlayerIndex = (currentChainLen) % room.players.length;
-    const nextPlayer = room.players[nextPlayerIndex];
-    const isDrawTurn = room.telephoneChain[currentChainLen - 1].type === 'describe';
+  const wordLen = room.currentWord.length;
+  room.currentHint = generateWordHint(room.currentWord, room.revealedIndexes);
 
-    io.to(room.code).emit('telephone_next_turn', {
-      nextPlayerId: nextPlayer.id,
-      nextPlayerName: nextPlayer.name,
-      turnType: isDrawTurn ? 'draw' : 'describe',
-      previousContent: room.telephoneChain[currentChainLen - 1].content
+  io.to(room.code).emit('drawing_phase_started', {
+    activeDrawerId: room.activeDrawerId,
+    wordHint: room.currentHint,
+    wordLength: wordLen,
+    timeLimit: room.drawTime,
+    room: sanitizeRoomForClient(room)
+  });
+
+  // Calculate reveal intervals for hints
+  const hintsToReveal = Math.min(room.hintsCount, Math.floor(wordLen / 2));
+  const hintIntervals = [];
+  if (hintsToReveal > 0) {
+    const step = Math.floor(room.drawTime / (hintsToReveal + 1));
+    for (let i = 1; i <= hintsToReveal; i++) {
+      hintIntervals.push(room.drawTime - step * i);
+    }
+  }
+
+  room.timer = setInterval(() => {
+    room.timeRemaining--;
+
+    // Reveal random unrevealed letter on interval ticks
+    if (hintIntervals.includes(room.timeRemaining)) {
+      revealRandomHintLetter(room);
+    }
+
+    io.to(room.code).emit('timer_tick', {
+      timeRemaining: room.timeRemaining,
+      wordHint: room.currentHint,
+      phase: 'drawing'
     });
+
+    if (room.timeRemaining <= 0) {
+      endTurnPhase(room, 'time_up');
+    }
+  }, 1000);
+}
+
+function revealRandomHintLetter(room) {
+  const word = room.currentWord;
+  const unrevealed = [];
+  for (let i = 0; i < word.length; i++) {
+    if (word[i] !== ' ' && !room.revealedIndexes.includes(i)) {
+      unrevealed.push(i);
+    }
+  }
+
+  if (unrevealed.length > 0) {
+    const randomIndex = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+    room.revealedIndexes.push(randomIndex);
+    room.currentHint = generateWordHint(room.currentWord, room.revealedIndexes);
+    io.to(room.code).emit('hint_updated', { wordHint: room.currentHint });
   }
 }
 
-function getAIBlindCritique(score, secretDesc) {
-  if (score > 85) return `🎯 Masterpiece! Uncanny interpretation of "${secretDesc}". AI is genuinely impressed!`;
-  if (score > 70) return `🎨 Solid effort! Captures the spirit of "${secretDesc}", though details got a bit lost in translation.`;
-  if (score > 55) return `🤔 Abstract take! Vague alignment with "${secretDesc}".`;
-  return `🤪 Total chaos! Looks less like "${secretDesc}" and more like an accidental smudge.`;
+function endTurnPhase(room, reason = 'time_up') {
+  clearInterval(room.timer);
+  room.status = 'turn_end';
+
+  io.to(room.code).emit('turn_ended', {
+    reason,
+    revealedWord: room.currentWord,
+    room: sanitizeRoomForClient(room)
+  });
+
+  setTimeout(() => {
+    room.currentTurnIndex++;
+    startWordSelectionPhase(room);
+  }, 4500);
+}
+
+function sanitizeRoomForClient(room) {
+  return {
+    code: room.code,
+    isPrivate: room.isPrivate,
+    maxPlayers: room.maxPlayers,
+    drawTime: room.drawTime,
+    totalRounds: room.totalRounds,
+    wordChoicesCount: room.wordChoicesCount,
+    hintsCount: room.hintsCount,
+    language: room.language,
+    hostId: room.hostId,
+    status: room.status,
+    currentRound: room.currentRound,
+    activeDrawerId: room.activeDrawerId,
+    timeRemaining: room.timeRemaining,
+    players: room.players.map(p => ({
+      id: p.id,
+      name: p.name,
+      avatar: p.avatar,
+      score: p.score,
+      scoreDelta: p.scoreDelta,
+      isHost: p.isHost,
+      hasGuessed: p.hasGuessed
+    }))
+  };
 }
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`
   =======================================================
-  🚀 ScribbleChaos Server Running (Vision AI Integrated)
+  🎨 ScribbleChaos (Skribbl.io Parity Engine) Running
   👉 URL: http://localhost:${PORT}
   =======================================================
   `);

@@ -1,75 +1,96 @@
-// Main Application Orchestrator for ScribbleChaos / Pixel Telephone
+// Main Application Orchestrator for ScribbleChaos (Skribbl Engine)
 class ScribbleApp {
   constructor() {
     this.currentView = 'profile';
-    this.selectedMode = 'pixel_telephone';
-
+    this.isDrawer = false;
     this.init();
   }
 
   init() {
-    console.log('🚀 Pixel Telephone App Initialized');
+    console.log('🎨 ScribbleChaos Skribbl App Initialized');
     this.bindDOMEvents();
+    this.checkUrlRoomCode();
     if (window.socketClient) window.socketClient.init();
   }
 
+  checkUrlRoomCode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomParam = urlParams.get('room');
+    if (roomParam) {
+      const joinInput = document.getElementById('joinRoomCodeInput');
+      if (joinInput) joinInput.value = roomParam.toUpperCase().trim();
+    }
+  }
+
   bindDOMEvents() {
-    // Stage 1: Continue Button
-    const btnContinue = document.getElementById('btnContinueToBattleground');
-    if (btnContinue) {
-      btnContinue.addEventListener('click', () => {
+    // 1. Play Public Button
+    const btnPlayPublic = document.getElementById('btnPlayPublic');
+    if (btnPlayPublic) {
+      btnPlayPublic.addEventListener('click', () => {
         if (window.soundEngine) window.soundEngine.playClick();
-        this.showGameSelectView();
+        this.handlePlayPublic();
       });
     }
 
-    // Stage 2: Back Button to Profile
-    const btnBackToProfile = document.getElementById('btnBackToProfile');
-    if (btnBackToProfile) {
-      btnBackToProfile.addEventListener('click', () => {
+    // 2. Open Private Room Settings Modal
+    const btnOpenCreateModal = document.getElementById('btnOpenCreateRoomModal');
+    const modalCreateRoom = document.getElementById('createRoomModal');
+    const btnCloseCreateModal = document.getElementById('btnCloseCreateRoomModal');
+    const btnConfirmCreateRoom = document.getElementById('btnConfirmCreateRoom');
+
+    if (btnOpenCreateModal && modalCreateRoom) {
+      btnOpenCreateModal.addEventListener('click', () => {
         if (window.soundEngine) window.soundEngine.playClick();
-        this.showProfileView();
+        modalCreateRoom.classList.add('active');
+      });
+    }
+    if (btnCloseCreateModal && modalCreateRoom) {
+      btnCloseCreateModal.addEventListener('click', () => {
+        modalCreateRoom.classList.remove('active');
+      });
+    }
+    if (btnConfirmCreateRoom && modalCreateRoom) {
+      btnConfirmCreateRoom.addEventListener('click', () => {
+        if (window.soundEngine) window.soundEngine.playClick();
+        modalCreateRoom.classList.remove('active');
+        this.handleCreatePrivateRoom();
       });
     }
 
-    // Mode Radio Selection Cards
-    const radioCards = document.querySelectorAll('.mode-radio-card');
-    radioCards.forEach(card => {
-      card.addEventListener('click', () => {
-        const mode = card.getAttribute('data-mode');
-        this.selectedMode = mode;
+    // 3. How to Play Modal
+    const btnOpenHowTo = document.getElementById('btnOpenHowToPlay');
+    const modalHowTo = document.getElementById('howToPlayModal');
+    const btnCloseHowTo = document.getElementById('btnCloseHowToPlay');
+    const btnGotItHowTo = document.getElementById('btnGotItHowToPlay');
 
-        radioCards.forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-
-        const radioInput = card.querySelector('input[type="radio"]');
-        if (radioInput) radioInput.checked = true;
-
+    if (btnOpenHowTo && modalHowTo) {
+      btnOpenHowTo.addEventListener('click', () => {
         if (window.soundEngine) window.soundEngine.playClick();
+        modalHowTo.classList.add('active');
       });
-    });
-
-    // Create Room Button Submit
-    const btnCreateRoomSubmit = document.getElementById('btnCreateRoomSubmit');
-    if (btnCreateRoomSubmit) {
-      btnCreateRoomSubmit.addEventListener('click', () => {
+    }
+    if (btnCloseHowTo && modalHowTo) {
+      btnCloseHowTo.addEventListener('click', () => modalHowTo.classList.remove('active'));
+    }
+    if (btnGotItHowTo && modalHowTo) {
+      btnGotItHowTo.addEventListener('click', () => {
         if (window.soundEngine) window.soundEngine.playClick();
-        this.handleCreateRoom();
+        modalHowTo.classList.remove('active');
       });
     }
 
-    // Join Room Button Submit
-    const btnJoinRoomSubmit = document.getElementById('btnJoinRoomSubmit');
+    // 4. Join Room Submit
+    const btnJoinRoom = document.getElementById('btnJoinRoomSubmit');
     const joinCodeInput = document.getElementById('joinRoomCodeInput');
-    if (btnJoinRoomSubmit) {
-      btnJoinRoomSubmit.addEventListener('click', () => {
+    if (btnJoinRoom) {
+      btnJoinRoom.addEventListener('click', () => {
         if (window.soundEngine) window.soundEngine.playClick();
         const code = joinCodeInput ? joinCodeInput.value.trim().toUpperCase() : '';
         if (code) this.handleJoinRoom(code);
       });
     }
 
-    // Settings Modal
+    // 5. Settings Modal (Audio)
     const btnOpenSettings = document.getElementById('btnOpenSettings');
     const btnCloseSettings = document.getElementById('btnCloseSettings');
     const btnSaveSettings = document.getElementById('btnSaveSettings');
@@ -81,18 +102,13 @@ class ScribbleApp {
         modalSettings.classList.add('active');
       });
     }
-
     if (btnCloseSettings && modalSettings) {
-      btnCloseSettings.addEventListener('click', () => {
-        modalSettings.classList.remove('active');
-      });
+      btnCloseSettings.addEventListener('click', () => modalSettings.classList.remove('active'));
     }
-
     if (btnSaveSettings && modalSettings) {
       btnSaveSettings.addEventListener('click', () => {
         const sfxToggle = document.getElementById('toggleSFX');
         const musicToggle = document.getElementById('toggleMusic');
-
         if (window.soundEngine) {
           window.soundEngine.sfxEnabled = sfxToggle ? sfxToggle.checked : true;
           window.soundEngine.toggleMusic(musicToggle ? musicToggle.checked : false);
@@ -102,35 +118,63 @@ class ScribbleApp {
       });
     }
 
-    // Leaderboard Modal Close
+    // 6. Leaderboard Close & Play Again
     const btnCloseLeaderboard = document.getElementById('btnCloseLeaderboard');
+    const btnPlayAgain = document.getElementById('btnPlayAgain');
     const modalLeaderboard = document.getElementById('leaderboardModal');
+
     if (btnCloseLeaderboard && modalLeaderboard) {
-      btnCloseLeaderboard.addEventListener('click', () => {
+      btnCloseLeaderboard.addEventListener('click', () => modalLeaderboard.classList.remove('active'));
+    }
+    if (btnPlayAgain && modalLeaderboard) {
+      btnPlayAgain.addEventListener('click', () => {
+        if (window.soundEngine) window.soundEngine.playClick();
         modalLeaderboard.classList.remove('active');
-        this.showProfileView();
+        if (window.socketClient && window.socketClient.currentRoom) {
+          window.socketClient.playAgain(window.socketClient.currentRoom.code);
+        }
       });
     }
 
-    // Exit Buttons
+    // 7. Exit Buttons
     const btnExitLobby = document.getElementById('btnExitLobby');
     const btnExitGame = document.getElementById('btnExitGame');
+    if (btnExitLobby) btnExitLobby.addEventListener('click', () => this.leaveCurrentRoom());
+    if (btnExitGame) btnExitGame.addEventListener('click', () => this.leaveCurrentRoom());
 
-    if (btnExitLobby) {
-      btnExitLobby.addEventListener('click', () => {
-        if (window.soundEngine) window.soundEngine.playClick();
-        this.leaveCurrentRoom();
+    // 8. Start Game from Lobby
+    const btnLobbyStart = document.getElementById('btnLobbyStart');
+    if (btnLobbyStart) {
+      btnLobbyStart.addEventListener('click', () => {
+        if (window.socketClient && window.socketClient.currentRoom) {
+          window.socketClient.startGame(window.socketClient.currentRoom.code);
+          if (window.soundEngine) window.soundEngine.playClick();
+        }
       });
     }
 
-    if (btnExitGame) {
-      btnExitGame.addEventListener('click', () => {
-        if (window.soundEngine) window.soundEngine.playClick();
-        this.leaveCurrentRoom();
+    // 9. Canvas Tools & Colors Binding
+    this.bindCanvasToolbar();
+
+    // 10. Guess & Chat Input
+    const guessInput = document.getElementById('guessInput');
+    const btnSendGuess = document.getElementById('btnSendGuess');
+    if (btnSendGuess && guessInput) {
+      const sendAction = () => {
+        const text = guessInput.value.trim();
+        if (text && window.socketClient && window.socketClient.currentRoom) {
+          window.socketClient.sendChat(window.socketClient.currentRoom.code, text);
+          guessInput.value = '';
+        }
+      };
+      btnSendGuess.addEventListener('click', sendAction);
+      guessInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendAction();
       });
     }
+  }
 
-    // Canvas Brush Tools Binding
+  bindCanvasToolbar() {
     const brushTools = [
       { id: 'btnBrush', type: 'pencil' },
       { id: 'btnMarker', type: 'marker' },
@@ -143,6 +187,7 @@ class ScribbleApp {
       const el = document.getElementById(tool.id);
       if (el) {
         el.addEventListener('click', () => {
+          if (!this.isDrawer) return;
           if (window.scribbleCanvas) window.scribbleCanvas.setBrushType(tool.type);
           brushTools.forEach(t => {
             const b = document.getElementById(t.id);
@@ -159,6 +204,7 @@ class ScribbleApp {
     const btnEraser = document.getElementById('btnEraser');
     if (btnEraser) {
       btnEraser.addEventListener('click', () => {
+        if (!this.isDrawer) return;
         if (window.scribbleCanvas) window.scribbleCanvas.setEraser();
         brushTools.forEach(t => {
           const b = document.getElementById(t.id);
@@ -172,6 +218,7 @@ class ScribbleApp {
     const btnClear = document.getElementById('btnClear');
     if (btnClear) {
       btnClear.addEventListener('click', () => {
+        if (!this.isDrawer) return;
         if (window.scribbleCanvas) window.scribbleCanvas.clear();
       });
     }
@@ -179,14 +226,15 @@ class ScribbleApp {
     const btnUndo = document.getElementById('btnUndo');
     if (btnUndo) {
       btnUndo.addEventListener('click', () => {
+        if (!this.isDrawer) return;
         if (window.scribbleCanvas) window.scribbleCanvas.undo();
       });
     }
 
-    // Brush Size Selector Buttons
     const sizeBtns = document.querySelectorAll('.size-btn');
     sizeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
+        if (!this.isDrawer) return;
         const sz = parseInt(btn.getAttribute('data-size')) || 8;
         if (window.scribbleCanvas) window.scribbleCanvas.setSize(sz);
         sizeBtns.forEach(b => b.classList.remove('active'));
@@ -195,73 +243,21 @@ class ScribbleApp {
       });
     });
 
-    // 26-Color Palette Swatches
     const colorSwatches = document.querySelectorAll('.color-swatch');
     colorSwatches.forEach(swatch => {
       swatch.addEventListener('click', () => {
+        if (!this.isDrawer) return;
         const col = swatch.getAttribute('data-color');
         if (window.scribbleCanvas) window.scribbleCanvas.setColor(col);
         colorSwatches.forEach(s => s.classList.remove('active'));
         swatch.classList.add('active');
-        
+
         const btnBrush = document.getElementById('btnBrush');
         if (btnBrush) btnBrush.classList.add('active');
         if (btnEraser) btnEraser.classList.remove('active');
         if (window.soundEngine) window.soundEngine.playClick();
       });
     });
-
-    // Guess Input
-    const guessInput = document.getElementById('guessInput');
-    const btnSendGuess = document.getElementById('btnSendGuess');
-    if (btnSendGuess && guessInput) {
-      const sendAction = () => {
-        const text = guessInput.value.trim();
-        if (text && window.socketClient && window.socketClient.currentRoom) {
-          window.socketClient.submitGuess(window.socketClient.currentRoom.code, text);
-          guessInput.value = '';
-        }
-      };
-      btnSendGuess.addEventListener('click', sendAction);
-      guessInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendAction();
-      });
-    }
-
-    // Mode 2 Blind Description Submit
-    const btnSubmitBlindDesc = document.getElementById('btnSubmitBlindDesc');
-    if (btnSubmitBlindDesc) {
-      btnSubmitBlindDesc.addEventListener('click', () => {
-        const input = document.getElementById('blindDescInput');
-        if (input && input.value.trim() && window.socketClient && window.socketClient.currentRoom) {
-          window.socketClient.submitBlindDescription(window.socketClient.currentRoom.code, input.value.trim());
-          if (window.soundEngine) window.soundEngine.playClick();
-        }
-      });
-    }
-
-    // Submit Canvas Drawing
-    const btnSubmitCanvas = document.getElementById('btnSubmitCanvas');
-    if (btnSubmitCanvas) {
-      btnSubmitCanvas.addEventListener('click', () => {
-        if (window.scribbleCanvas && window.socketClient && window.socketClient.currentRoom) {
-          const dataUrl = window.scribbleCanvas.getDataUrl();
-          window.socketClient.submitDrawing(window.socketClient.currentRoom.code, dataUrl);
-          if (window.soundEngine) window.soundEngine.playSuccessFanfare();
-        }
-      });
-    }
-
-    // Start Game from Lobby Button
-    const btnLobbyStart = document.getElementById('btnLobbyStart');
-    if (btnLobbyStart) {
-      btnLobbyStart.addEventListener('click', () => {
-        if (window.socketClient && window.socketClient.currentRoom) {
-          window.socketClient.startGame(window.socketClient.currentRoom.code);
-          if (window.soundEngine) window.soundEngine.playClick();
-        }
-      });
-    }
   }
 
   getPlayerName() {
@@ -270,34 +266,54 @@ class ScribbleApp {
     return val || `Artist_${Math.floor(Math.random() * 899 + 100)}`;
   }
 
+  getAvatarData() {
+    return window.avatarEngine ? window.avatarEngine.state : {};
+  }
+
   showProfileView() {
     this.currentView = 'profile';
     document.getElementById('profileView').style.display = 'flex';
-    document.getElementById('gameSelectView').style.display = 'none';
     document.getElementById('lobbyView').style.display = 'none';
     document.getElementById('gameArenaView').classList.remove('active');
-    document.getElementById('revealGalleryView').style.display = 'none';
-  }
-
-  showGameSelectView() {
-    this.currentView = 'gameSelect';
-    document.getElementById('profileView').style.display = 'none';
-    document.getElementById('gameSelectView').style.display = 'flex';
-    document.getElementById('lobbyView').style.display = 'none';
-    document.getElementById('gameArenaView').classList.remove('active');
-    document.getElementById('revealGalleryView').style.display = 'none';
   }
 
   goBackToHome() {
     this.showProfileView();
   }
 
-  handleCreateRoom() {
+  handlePlayPublic() {
     const playerName = this.getPlayerName();
+    const avatar = this.getAvatarData();
     if (window.socketClient) {
       window.socketClient.playerName = playerName;
-      window.socketClient.createRoom(this.selectedMode, 8, 60, (res) => {
+      window.socketClient.quickMatch(avatar, (res) => {
+        if (res && res.success) this.showLobbyView(res.room);
+      });
+    }
+  }
+
+  handleCreatePrivateRoom() {
+    const playerName = this.getPlayerName();
+    const avatar = this.getAvatarData();
+
+    const settings = {
+      maxPlayers: document.getElementById('settingMaxPlayers').value,
+      drawTime: document.getElementById('settingDrawTime').value,
+      totalRounds: document.getElementById('settingTotalRounds').value,
+      wordChoicesCount: document.getElementById('settingWordChoicesCount').value,
+      hintsCount: document.getElementById('settingHintsCount').value,
+      customWords: document.getElementById('settingCustomWords').value,
+      customWordsOnly: document.getElementById('settingCustomWordsOnly').checked,
+      language: document.getElementById('languageSelect').value
+    };
+
+    if (window.socketClient) {
+      window.socketClient.playerName = playerName;
+      window.socketClient.createRoom(settings, avatar, (res) => {
         if (res && res.success) {
+          const shareUrl = `${window.location.origin}${window.location.pathname}?room=${res.roomCode}`;
+          navigator.clipboard.writeText(shareUrl).catch(() => {});
+          alert(`Private Room Created! Shareable Link Copied:\n${shareUrl}`);
           this.showLobbyView(res.room);
         }
       });
@@ -306,9 +322,10 @@ class ScribbleApp {
 
   handleJoinRoom(code) {
     const playerName = this.getPlayerName();
+    const avatar = this.getAvatarData();
     if (window.socketClient) {
       window.socketClient.playerName = playerName;
-      window.socketClient.joinRoom(code, (res) => {
+      window.socketClient.joinRoom(code, avatar, (res) => {
         if (res && res.success) {
           this.showLobbyView(res.room);
         } else {
@@ -329,13 +346,13 @@ class ScribbleApp {
   showLobbyView(room) {
     this.currentView = 'lobby';
     document.getElementById('profileView').style.display = 'none';
-    document.getElementById('gameSelectView').style.display = 'none';
     document.getElementById('lobbyView').style.display = 'block';
     document.getElementById('gameArenaView').classList.remove('active');
-    document.getElementById('revealGalleryView').style.display = 'none';
 
     document.getElementById('lobbyCodeDisplay').innerText = room.code;
-    document.getElementById('lobbyModeBadge').innerText = `MODE: ${room.mode.toUpperCase().replace('_', ' ')}`;
+    document.getElementById('lobbySettingsBadge').innerText = `${room.totalRounds} Rounds | ${room.drawTime}s Draw | ${room.maxPlayers} Players Max`;
+    document.getElementById('playerCount').innerText = room.players.length;
+    document.getElementById('maxPlayerCount').innerText = room.maxPlayers;
 
     this.renderLobbyPlayers(room);
   }
@@ -366,167 +383,219 @@ class ScribbleApp {
   onRoomUpdated(room) {
     if (this.currentView === 'lobby') {
       this.renderLobbyPlayers(room);
+    } else if (this.currentView === 'game') {
+      this.renderPlayerLeaderboard(room);
     }
   }
 
-  onRoundStarted(data) {
+  onWordSelectionPhase(data) {
     this.currentView = 'game';
     document.getElementById('profileView').style.display = 'none';
-    document.getElementById('gameSelectView').style.display = 'none';
     document.getElementById('lobbyView').style.display = 'none';
-    document.getElementById('revealGalleryView').style.display = 'none';
     document.getElementById('gameArenaView').classList.add('active');
 
+    document.getElementById('roundDisplay').innerText = `Round ${data.round} of ${data.totalRounds}`;
+    document.getElementById('timerDisplay').innerText = `${data.timeLimit}s`;
+    document.getElementById('wordHintDisplay').innerText = `Selecting Word...`;
+
+    // Hide turn end overlay
+    document.getElementById('turnEndOverlay').style.display = 'none';
+
+    // Check if I am active drawer
+    const myId = window.socketClient.socket ? window.socketClient.socket.id : null;
+    this.isDrawer = (myId === data.activeDrawerId);
+
+    // Initialize or clear canvas
     const canvasEl = document.getElementById('mainCanvas');
     if (canvasEl && !window.scribbleCanvas) {
       window.scribbleCanvas = new ScribbleCanvas(canvasEl);
+      window.scribbleCanvas.onStrokeCallback = (stroke) => {
+        if (this.isDrawer && window.socketClient && window.socketClient.currentRoom) {
+          window.socketClient.sendStroke(window.socketClient.currentRoom.code, stroke);
+        }
+      };
     } else if (window.scribbleCanvas) {
       window.scribbleCanvas.clear();
     }
 
-    document.getElementById('promptText').innerText = `Prompt: ${data.prompt}`;
+    this.toggleDrawingToolbar(this.isDrawer);
+
+    if (window.soundEngine) window.soundEngine.playClick();
+  }
+
+  onChooseWordPrompt(data) {
+    const overlay = document.getElementById('wordSelectionOverlay');
+    const container = document.getElementById('wordChoicesContainer');
+    const timerEl = document.getElementById('selectWordTimer');
+
+    if (!overlay || !container) return;
+    overlay.style.display = 'flex';
+    if (timerEl) timerEl.innerText = '15';
+
+    container.innerHTML = (data.choices || []).map(word => `
+      <div class="word-choice-card" onclick="app.selectWordChoice('${word}')">${word}</div>
+    `).join('');
+  }
+
+  selectWordChoice(word) {
+    const overlay = document.getElementById('wordSelectionOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    if (window.socketClient && window.socketClient.currentRoom) {
+      window.socketClient.selectWord(window.socketClient.currentRoom.code, word);
+      if (window.soundEngine) window.soundEngine.playClick();
+    }
+  }
+
+  onDrawingPhaseStarted(data) {
+    const overlay = document.getElementById('wordSelectionOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    document.getElementById('wordHintDisplay').innerText = data.wordHint;
     document.getElementById('timerDisplay').innerText = `${data.timeLimit}s`;
-    document.getElementById('guessesFeed').innerHTML = `
-      <div class="guess-msg ai">🤖 AI Judge joined the room! Sarcasm meter initialised.</div>
-    `;
 
-    const isMode1 = data.mode === 'ai_judges';
-    const isMode2 = data.mode === 'blind_artist';
-    const isMode3 = data.mode === 'pixel_telephone';
+    if (data.room) this.renderPlayerLeaderboard(data.room);
+  }
 
-    document.getElementById('mode1GuessBox').style.display = isMode1 ? 'flex' : 'none';
-    document.getElementById('mode2BlindBox').style.display = isMode2 ? 'block' : 'none';
-    document.getElementById('mode3TelephoneBox').style.display = isMode3 ? 'block' : 'none';
+  onHintUpdated(data) {
+    const hintEl = document.getElementById('wordHintDisplay');
+    if (hintEl && data.wordHint) hintEl.innerText = data.wordHint;
   }
 
   onTimerTick(data) {
     const timerEl = document.getElementById('timerDisplay');
     if (timerEl) timerEl.innerText = `${data.timeRemaining}s`;
 
+    if (data.phase === 'selecting_word') {
+      const choiceTimer = document.getElementById('selectWordTimer');
+      if (choiceTimer) choiceTimer.innerText = `${data.timeRemaining}`;
+    }
+
     if (data.timeRemaining <= 10 && window.soundEngine) {
       window.soundEngine.playTick();
     }
   }
 
-  onAICommentary(data) {
+  onTurnEnded(data) {
+    const overlay = document.getElementById('turnEndOverlay');
+    if (overlay) {
+      overlay.style.display = 'flex';
+      document.getElementById('revealedWordText').innerText = data.revealedWord || '';
+      document.getElementById('turnEndReasonTitle').innerText = data.reason === 'all_guessed' ? 'Everyone Guessed Correctly!' : 'Time\'s Up!';
+    }
+    if (data.room) this.renderPlayerLeaderboard(data.room);
+  }
+
+  onCorrectGuess(data) {
+    const feed = document.getElementById('guessesFeed');
+    if (feed) {
+      const msg = document.createElement('div');
+      msg.className = 'guess-msg correct';
+      msg.innerHTML = `🎉 <strong>${data.guesserName}</strong> guessed the word! (+${data.points} pts)`;
+      feed.appendChild(msg);
+      feed.scrollTop = feed.scrollHeight;
+    }
+    if (window.soundEngine) window.soundEngine.playSuccessFanfare();
+    if (data.room) this.renderPlayerLeaderboard(data.room);
+  }
+
+  onCloseGuess(data) {
     const feed = document.getElementById('guessesFeed');
     if (feed) {
       const msg = document.createElement('div');
       msg.className = 'guess-msg ai';
-      msg.innerHTML = `<strong>AI Guess:</strong> "${data.guess}" <br><small>💬 "${data.comment}"</small>`;
+      msg.innerHTML = `⚠️ <em>${data.message}</em>`;
       feed.appendChild(msg);
       feed.scrollTop = feed.scrollHeight;
     }
-    if (window.soundEngine) window.soundEngine.playAICockyBuzz();
+    if (window.soundEngine) window.soundEngine.playClick();
   }
 
-  onGuessResult(data) {
+  onChatBlocked(data) {
     const feed = document.getElementById('guessesFeed');
     if (feed) {
       const msg = document.createElement('div');
-      msg.className = data.success ? 'guess-msg correct' : 'guess-msg';
-      msg.innerHTML = data.success 
-        ? `🎉 <strong>${data.guesserName}</strong> guessed correctly! +${data.points} pts!` 
-        : `💬 <strong>${data.guesserName}:</strong> ${data.guess}`;
+      msg.className = 'guess-msg sys';
+      msg.innerHTML = `🚫 <strong>${data.message}</strong>`;
       feed.appendChild(msg);
       feed.scrollTop = feed.scrollHeight;
     }
-
-    if (data.success && window.soundEngine) {
-      window.soundEngine.playSuccessFanfare();
-    }
   }
 
-  onBlindDescriptionSet(data) {
-    const blindBox = document.getElementById('mode2BlindBox');
-    if (blindBox) {
-      blindBox.innerHTML = `
-        <div style="background:#ffffff; border:3px solid var(--color-navy); padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-neo); color:var(--color-navy);">
-          <strong>👁️ Secret Scene Description Received:</strong>
-          <p style="margin-top:0.4rem; font-size:1.15rem; background:var(--color-yellow); padding:0.4rem 0.8rem; border-radius:8px; border:2px solid #000; font-weight:800;">"${data.description}"</p>
-          <small style="color:var(--color-muted); display:block; margin-top:0.4rem;">Draw what you hear! AI will judge the match score.</small>
-        </div>
-      `;
-    }
-  }
-
-  onBlindEvaluationResult(data) {
+  onChatMessage(data) {
     const feed = document.getElementById('guessesFeed');
     if (feed) {
       const msg = document.createElement('div');
-      msg.className = 'guess-msg ai';
-      msg.innerHTML = `
-        <strong>🏆 AI Evaluation for ${data.playerName}:</strong><br>
-        Similarity Score: <strong>${data.similarityScore}%</strong> (+${data.points} pts)<br>
-        <em>${data.aiCritique}</em>
-      `;
+      msg.className = data.isGuessed ? 'guess-msg correct' : 'guess-msg';
+      msg.innerHTML = `<strong>${data.senderName}:</strong> ${data.message}`;
       feed.appendChild(msg);
       feed.scrollTop = feed.scrollHeight;
     }
   }
 
-  onTelephoneNextTurn(data) {
-    const isMyTurn = socketClient.socket && socketClient.socket.id === data.nextPlayerId;
-    const box = document.getElementById('mode3TelephoneBox');
-    if (box) {
-      box.innerHTML = isMyTurn ? `
-        <div style="background:#ffffff; border:3px solid var(--color-navy); padding:1.2rem; border-radius:16px; box-shadow:var(--shadow-neo);">
-          <h4 style="color:var(--color-navy); font-size:1.2rem;">IT'S YOUR TURN!</h4>
-          <p style="margin-top:0.4rem;">Previous input: <em>"${data.previousContent}"</em></p>
-          ${data.turnType === 'describe' ? `
-            <input type="text" id="telephoneDescInput" class="neo-input" placeholder="Describe the drawing above..." style="width:100%; margin-top:0.8rem;">
-            <button id="btnSubmitTelephoneDesc" class="btn-neo-yellow" style="margin-top:0.6rem; font-size:1rem;">Submit Description</button>
-          ` : `
-            <p style="margin-top:0.4rem; font-weight:700;">Draw based on the description above!</p>
-          `}
-        </div>
-      ` : `
-        <p style="color:rgba(255,255,255,0.9); font-weight:700; text-shadow:0 2px 4px #000;">Waiting for ${data.nextPlayerName} to complete their ${data.turnType} turn...</p>
-      `;
-
-      const btnSubmitTelephoneDesc = document.getElementById('btnSubmitTelephoneDesc');
-      if (btnSubmitTelephoneDesc) {
-        btnSubmitTelephoneDesc.addEventListener('click', () => {
-          const input = document.getElementById('telephoneDescInput');
-          if (input && input.value.trim() && window.socketClient && window.socketClient.currentRoom) {
-            window.socketClient.submitTelephoneDescription(window.socketClient.currentRoom.code, input.value.trim());
-            if (window.soundEngine) window.soundEngine.playClick();
-          }
-        });
-      }
+  onVoteKickUpdated(data) {
+    const feed = document.getElementById('guessesFeed');
+    if (feed) {
+      const msg = document.createElement('div');
+      msg.className = 'guess-msg sys';
+      msg.innerHTML = `👢 <strong>Vote Kick:</strong> ${data.currentVotes}/${data.neededVotes} votes to kick ${data.targetName}`;
+      feed.appendChild(msg);
+      feed.scrollTop = feed.scrollHeight;
     }
   }
 
-  onTelephoneReveal(data) {
-    this.currentView = 'reveal';
-    document.getElementById('profileView').style.display = 'none';
-    document.getElementById('gameSelectView').style.display = 'none';
-    document.getElementById('lobbyView').style.display = 'none';
-    document.getElementById('gameArenaView').classList.remove('active');
-    
-    const revealView = document.getElementById('revealGalleryView');
-    revealView.style.display = 'block';
+  onPlayerRemoved(data) {
+    alert(`You were ${data.reason} from the room.`);
+    this.showProfileView();
+  }
 
-    const galleryContainer = document.getElementById('telephoneGallery');
-    if (galleryContainer) {
-      galleryContainer.innerHTML = data.chain.map((step, idx) => `
-        <div style="background:#ffffff; border:3px solid var(--color-navy); border-radius:16px; box-shadow:var(--shadow-neo); padding:1.25rem; display:flex; flex-direction:column; gap:0.75rem; align-items:center; color:var(--color-navy);">
-          <span style="background:var(--color-yellow); color:#000; font-weight:900; padding:0.3rem 0.8rem; border-radius:8px; border:2px solid #000;">Step ${idx + 1}: ${step.type.toUpperCase()}</span>
-          <p style="font-weight:700;">Player: ${step.playerName}</p>
-          ${step.type === 'draw' 
-            ? `<img src="${step.content}" style="width:100%; max-width:280px; border-radius:8px; border:2px solid #000;" />` 
-            : `<div style="background:#0f172a; padding:1rem; border-radius:8px; width:100%; text-align:center; font-size:1.1rem; color:var(--color-yellow); font-weight:800;">"${step.content}"</div>`}
+  renderPlayerLeaderboard(room) {
+    const panel = document.getElementById('playerLeaderboardList');
+    if (!panel) return;
+
+    const myId = window.socketClient.socket ? window.socketClient.socket.id : null;
+    const sorted = [...room.players].sort((a, b) => b.score - a.score);
+
+    panel.innerHTML = sorted.map((p, idx) => {
+      const isDrawer = p.id === room.activeDrawerId;
+      const cardClass = isDrawer ? 'leaderboard-player-card drawing' : (p.hasGuessed ? 'leaderboard-player-card guessed' : 'leaderboard-player-card');
+
+      return `
+        <div class="${cardClass}">
+          <div class="player-rank-badge">#${idx + 1}</div>
+          <div class="player-card-info">
+            <span class="player-card-name">${p.name} ${isDrawer ? '✏️' : ''} ${p.isHost ? '👑' : ''}</span>
+            <span class="player-score-text">${p.score} pts</span>
+          </div>
+          ${p.scoreDelta > 0 ? `<span class="score-delta-tag">+${p.scoreDelta}</span>` : ''}
+          ${!p.isHost && p.id !== myId ? `
+            <button onclick="app.triggerVoteKick('${p.id}')" title="Vote to kick player" style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-size:0.85rem; padding:0 0.2rem;">
+              <i class="fa-solid fa-ban"></i>
+            </button>
+          ` : ''}
         </div>
-      `).join('');
-    }
+      `;
+    }).join('');
+  }
 
-    document.getElementById('telephoneSummary').innerText = `${data.summary} (Chaos Distortion Rating: ${data.distortionScore}%)`;
+  triggerVoteKick(targetId) {
+    if (window.socketClient && window.socketClient.currentRoom) {
+      window.socketClient.voteKick(window.socketClient.currentRoom.code, targetId);
+    }
+  }
+
+  toggleDrawingToolbar(enabled) {
+    const toolbar = document.getElementById('drawingToolbar');
+    if (toolbar) {
+      toolbar.style.opacity = enabled ? '1' : '0.5';
+      toolbar.style.pointerEvents = enabled ? 'auto' : 'none';
+    }
   }
 
   onGameOver(data) {
     const leaderboard = data.leaderboard || [];
     const podiumEl = document.getElementById('podiumContainer');
-    
+
     if (podiumEl) {
       const p1 = leaderboard[0] || { name: 'Player 1', score: 0 };
       const p2 = leaderboard[1] || { name: 'Player 2', score: 0 };
