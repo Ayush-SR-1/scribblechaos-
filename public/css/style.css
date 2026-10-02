@@ -162,25 +162,29 @@ body {
   border: 3.5px solid var(--color-navy);
   border-radius: var(--border-radius-card);
   box-shadow: var(--shadow-neo), 0 20px 40px rgba(0,0,0,0.4);
-  padding: 1.75rem;
+  padding: 1.5rem;
   width: 100%;
-  max-width: 540px;
+  max-width: 480px;
   color: var(--color-card-text);
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
   backdrop-filter: blur(16px);
+  box-sizing: border-box;
 }
 
 .name-lang-row {
   display: flex;
   gap: 0.75rem;
+  width: 100%;
 }
 
 .neo-input {
   flex: 1;
-  padding: 0.9rem 1.1rem;
-  font-size: 1.05rem;
+  min-width: 0;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
   font-family: var(--font-main);
   font-weight: 600;
   color: var(--color-navy);
@@ -188,22 +192,26 @@ body {
   border: 2.5px solid var(--color-navy);
   border-radius: var(--border-radius-input);
   outline: none;
+  box-sizing: border-box;
 }
 .neo-input:focus {
   box-shadow: 3px 3px 0px var(--color-navy);
 }
 
 .neo-select {
-  padding: 0.9rem 1rem;
+  padding: 0.85rem 0.8rem;
   font-family: var(--font-main);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--color-navy);
   background: #ffffff;
   border: 2.5px solid var(--color-navy);
   border-radius: var(--border-radius-input);
   outline: none;
   cursor: pointer;
+  box-sizing: border-box;
+  max-width: 125px;
+  flex-shrink: 0;
 }
 
 /* Avatar Customizer Box */
@@ -709,6 +717,176 @@ body {
   font-weight: 800;
 }
 
+/* Modal Overlays & Cards */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.active {
+  display: flex !important;
+}
+
+.modal-card {
+  background: #ffffff;
+  border: 3.5px solid var(--color-navy);
+  border-radius: 20px;
+  box-shadow: var(--shadow-neo), 0 20px 40px rgba(0,0,0,0.5);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 480px;
+  color: var(--color-navy);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 1001;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2.5px solid #e2e8f0;
+  padding-bottom: 0.75rem;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--color-navy);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-close-modal {
+  background: #f1f5f9;
+  border: 2px solid var(--color-navy);
+  color: var(--color-navy);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  font-size: 1.3rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.btn-close-modal:hover {
+  background: var(--color-red-btn);
+  color: #ffffff;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+}
+
+.setting-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-navy);
+}
+
+/* Toggle Switch Styling */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 34px;
+  border: 2px solid var(--color-navy);
+}
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-navy);
+}
+input:checked + .toggle-slider {
+  background-color: var(--color-green-btn);
+}
+input:checked + .toggle-slider:before {
+  transform: translateX(22px);
+}
+
+/* Victory Leaderboard Podium Styles */
+.podium-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  height: 180px;
+}
+
+.podium-step {
+  flex: 1;
+  background: #ffffff;
+  border: 2.5px solid var(--color-navy);
+  border-radius: 14px 14px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.75rem 0.5rem;
+  box-shadow: var(--shadow-neo);
+}
+.podium-step.first {
+  height: 100%;
+  background: var(--color-yellow);
+  border-width: 3.5px;
+}
+.podium-step.second {
+  height: 75%;
+  background: #e2e8f0;
+}
+.podium-step.third {
+  height: 60%;
+  background: #ffedd5;
+}
+
+.podium-medal { font-size: 1.8rem; margin-bottom: 0.25rem; }
+.podium-name { font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; color: var(--color-navy); text-align: center; }
+.podium-score { font-size: 0.85rem; font-weight: 900; color: #475569; }
+
 .footer-bar {
   position: relative;
   z-index: 5;
@@ -771,9 +949,9 @@ button, input, select, .color-swatch, .tool-btn, .mode-radio-card, .size-btn, .a
   .modal-card { width: 92%; max-height: 90vh; overflow-y: auto; padding: 1.25rem; }
 }
 
-@media (max-width: 480px) {
-  .main-wrapper { padding: 0 0.5rem; margin: 0.75rem auto; }
-  .portal-title-row { font-size: 1.8rem; }
+@media (max-width: 640px) {
+  .main-wrapper { padding: 0 0.75rem; margin: 0.75rem auto; }
+  .portal-title-row { font-size: 1.9rem; flex-wrap: wrap; justify-content: center; }
   .title-highlight-box { padding: 0.1rem 0.5rem; }
   .portal-subtitle { font-size: 0.95rem; }
 
@@ -782,7 +960,10 @@ button, input, select, .color-swatch, .tool-btn, .mode-radio-card, .size-btn, .a
     width: 100%;
     gap: 0.6rem;
   }
-  .name-lang-row .neo-input, .name-lang-row .neo-select { width: 100%; }
+  .name-lang-row .neo-input, .name-lang-row .neo-select {
+    width: 100%;
+    max-width: 100%;
+  }
 
   .avatar-customizer-box {
     flex-direction: column;
