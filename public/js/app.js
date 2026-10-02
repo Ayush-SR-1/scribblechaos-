@@ -8,13 +8,13 @@ class ScribbleApp {
   }
 
   init() {
-    console.log('🚀 Pixel Telephone UI App Initialized');
+    console.log('🚀 Pixel Telephone Skribbl UI App Initialized');
     this.bindDOMEvents();
     if (window.socketClient) window.socketClient.init();
   }
 
   bindDOMEvents() {
-    // Mode Radio Selection Card Clicks & Highlight toggles
+    // Mode Radio Selection Cards
     const radioCards = document.querySelectorAll('.mode-radio-card');
     radioCards.forEach(card => {
       card.addEventListener('click', () => {
@@ -31,16 +31,25 @@ class ScribbleApp {
       });
     });
 
-    // Create Room Button Submit
-    const btnCreateRoomSubmit = document.getElementById('btnCreateRoomSubmit');
-    if (btnCreateRoomSubmit) {
-      btnCreateRoomSubmit.addEventListener('click', () => {
+    // Green Play! Button (Instant Matchmaking)
+    const btnQuickPlay = document.getElementById('btnQuickPlay');
+    if (btnQuickPlay) {
+      btnQuickPlay.addEventListener('click', () => {
         if (window.soundEngine) window.soundEngine.playClick();
-        this.handleCreateRoom();
+        this.handleQuickPlay();
       });
     }
 
-    // Join Room Button Submit
+    // Blue Create Private Room Button
+    const btnCreatePrivateRoom = document.getElementById('btnCreatePrivateRoom');
+    if (btnCreatePrivateRoom) {
+      btnCreatePrivateRoom.addEventListener('click', () => {
+        if (window.soundEngine) window.soundEngine.playClick();
+        this.handleCreatePrivateRoom();
+      });
+    }
+
+    // Join Room Button
     const btnJoinRoomSubmit = document.getElementById('btnJoinRoomSubmit');
     const joinCodeInput = document.getElementById('joinRoomCodeInput');
     if (btnJoinRoomSubmit) {
@@ -48,15 +57,6 @@ class ScribbleApp {
         if (window.soundEngine) window.soundEngine.playClick();
         const code = joinCodeInput ? joinCodeInput.value.trim().toUpperCase() : '';
         if (code) this.handleJoinRoom(code);
-      });
-    }
-
-    // Global Yellow Back Button
-    const btnBackGlobal = document.getElementById('btnBackGlobal');
-    if (btnBackGlobal) {
-      btnBackGlobal.addEventListener('click', () => {
-        if (window.soundEngine) window.soundEngine.playClick();
-        this.goBackToHome();
       });
     }
 
@@ -71,7 +71,7 @@ class ScribbleApp {
       });
     }
 
-    // Guess input box
+    // Guess submission input
     const guessInput = document.getElementById('guessInput');
     const btnSendGuess = document.getElementById('btnSendGuess');
     if (btnSendGuess && guessInput) {
@@ -88,7 +88,7 @@ class ScribbleApp {
       });
     }
 
-    // Mode 2 Blind Scene Description Submit
+    // Mode 2 Blind Description Submit
     const btnSubmitBlindDesc = document.getElementById('btnSubmitBlindDesc');
     if (btnSubmitBlindDesc) {
       btnSubmitBlindDesc.addEventListener('click', () => {
@@ -100,7 +100,7 @@ class ScribbleApp {
       });
     }
 
-    // Submit Drawing Canvas
+    // Submit Canvas Drawing
     const btnSubmitCanvas = document.getElementById('btnSubmitCanvas');
     if (btnSubmitCanvas) {
       btnSubmitCanvas.addEventListener('click', () => {
@@ -112,7 +112,7 @@ class ScribbleApp {
       });
     }
 
-    // Start Game from Lobby
+    // Start Game from Lobby Button
     const btnLobbyStart = document.getElementById('btnLobbyStart');
     if (btnLobbyStart) {
       btnLobbyStart.addEventListener('click', () => {
@@ -130,7 +130,19 @@ class ScribbleApp {
     return val || `Artist_${Math.floor(Math.random() * 899 + 100)}`;
   }
 
-  handleCreateRoom() {
+  handleQuickPlay() {
+    const playerName = this.getPlayerName();
+    if (window.socketClient) {
+      window.socketClient.playerName = playerName;
+      window.socketClient.quickMatch((res) => {
+        if (res && res.success) {
+          this.showLobbyView(res.room);
+        }
+      });
+    }
+  }
+
+  handleCreatePrivateRoom() {
     const playerName = this.getPlayerName();
     if (window.socketClient) {
       window.socketClient.playerName = playerName;
@@ -158,7 +170,7 @@ class ScribbleApp {
 
   goBackToHome() {
     this.currentView = 'home';
-    document.getElementById('portalView').style.display = 'block';
+    document.getElementById('portalView').style.display = 'flex';
     document.getElementById('lobbyView').style.display = 'none';
     document.getElementById('gameArenaView').classList.remove('active');
     document.getElementById('revealGalleryView').style.display = 'none';
@@ -181,10 +193,15 @@ class ScribbleApp {
     const listEl = document.getElementById('lobbyPlayersList');
     if (!listEl) return;
 
+    const currentAvatarSvg = window.avatarEngine ? window.avatarEngine.getSvgString() : '';
+
     listEl.innerHTML = room.players.map(p => `
-      <div style="background:#f8fafc; padding:0.8rem 1.2rem; border-radius:10px; display:flex; justify-content:space-between; align-items:center; border:2px solid var(--color-navy); color:var(--color-navy);">
-        <span style="font-weight:700;">${p.name} ${p.isHost ? '👑 (Host)' : ''}</span>
-        <span style="color:var(--color-navy); font-weight:800; background:var(--color-yellow); padding:0.2rem 0.6rem; border-radius:6px; border:1px solid #000;">READY</span>
+      <div style="background:#ffffff; padding:0.8rem 1.2rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:2.5px solid var(--color-navy); box-shadow:3px 3px 0px var(--color-navy); color:var(--color-navy);">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <div style="width:38px; height:38px;">${currentAvatarSvg}</div>
+          <span style="font-weight:800; font-size:1.05rem;">${p.name} ${p.isHost ? '👑 (Host)' : ''}</span>
+        </div>
+        <span style="color:var(--color-navy); font-size:0.85rem; font-weight:900; background:var(--color-yellow); padding:0.25rem 0.75rem; border-radius:8px; border:2px solid #000;">READY</span>
       </div>
     `).join('');
 
@@ -195,7 +212,7 @@ class ScribbleApp {
     }
   }
 
-  // Socket Event Callbacks
+  // Socket event callbacks
   onRoomUpdated(room) {
     if (this.currentView === 'lobby') {
       this.renderLobbyPlayers(room);
@@ -312,7 +329,7 @@ class ScribbleApp {
           <p style="margin-top:0.4rem;">Previous input: <em>"${data.previousContent}"</em></p>
           ${data.turnType === 'describe' ? `
             <input type="text" id="telephoneDescInput" class="neo-input" placeholder="Describe the drawing above..." style="width:100%; margin-top:0.8rem;">
-            <button id="btnSubmitTelephoneDesc" class="btn-neo-yellow" style="margin-top:0.6rem; font-size:1rem;">Submit Description</button>
+            <button id="btnSubmitTelephoneDesc" class="btn-skribbl-play" style="margin-top:0.6rem; font-size:1rem;">Submit Description</button>
           ` : `
             <p style="margin-top:0.4rem; font-weight:700;">Draw based on the description above!</p>
           `}
